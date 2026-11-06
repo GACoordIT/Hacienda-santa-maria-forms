@@ -529,6 +529,7 @@ async function generatePDF(){
   y=totalY-9;
   const legal='Reserva y arras: el monto no es reembolsable conforme a las condiciones contractuales aplicables. Gastos de cierre no incluidos en el precio: gastos legales, timbres de acción y gastos de conexión.';
   p.drawRectangle({x:28,y:y-25,width:539,height:25,radius:3,color:C.legal,borderColor:PDFColor('#e2d8bf'),borderWidth:.4});
+  y-=39;
   wrapText(fonts.reg,legal,5.3,523).slice(0,3).forEach((line,i)=>drawText(p,fonts.reg,line,36,y-9-i*6.5,5.3,C.ink,523));
   y-=39;
   drawText(p,fonts.bold,'FECHA DE ENTREGA',28,y,5.2,C.muted,130);
