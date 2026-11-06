@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hacienda Santa María | Formulario de asignación</title>
+<style>
+:root{
+ --forest:#263b31; --forest-2:#354d40; --sage:#dce4d9; --sage-2:#edf1e9;
+ --gold:#b49a62; --ink:#26312b; --muted:#69746c; --paper:#fbfaf6; --line:#d8ddd4;
+ --white:#fff; --danger:#9c3c32;
+ font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+ color:var(--ink); background:#eef0eb;
+}
+*{box-sizing:border-box} body{margin:0}
+header{background:var(--forest);color:#fff;padding:22px 18px 20px;border-bottom:4px solid var(--gold)}
+.header-inner{max-width:1080px;margin:auto;display:flex;align-items:center;gap:24px;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:16px;min-width:0}
+.brand img{width:min(250px,52vw);height:auto;max-height:64px;object-fit:contain;filter:brightness(0) invert(1)}
+.brand-copy{border-left:1px solid #718174;padding-left:16px;font-family:Georgia,serif;font-size:1.05rem;letter-spacing:.05em;color:#e9e5d9}
+.header-note{text-align:right;color:#d9dfd7;font-size:.76rem;letter-spacing:.16em;text-transform:uppercase}
+main{max-width:1080px;margin:26px auto;padding:0 16px 40px}
+.intro{margin-bottom:20px;display:flex;justify-content:space-between;gap:20px;align-items:end}
+.eyebrow{color:#8a7547;text-transform:uppercase;font-size:.72rem;font-weight:800;letter-spacing:.17em}
+h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(1.65rem,4vw,2.35rem);font-weight:400;color:var(--forest);margin:5px 0}
+.intro p{margin:0;color:var(--muted);max-width:670px;line-height:1.5}
+.pill{background:var(--sage-2);border:1px solid var(--line);border-radius:999px;padding:8px 12px;color:var(--forest);font-size:.78rem;white-space:nowrap}
+.notice{background:#f4f1e7;border-left:3px solid var(--gold);padding:12px 14px;border-radius:0 9px 9px 0;color:#655a40;font-size:.9rem;margin-bottom:18px;line-height:1.45}
+form{display:grid;gap:16px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 6px 22px #23382c0a}
+.card-head{display:flex;align-items:center;gap:12px;padding:15px 18px;background:#f0f2eb;border-bottom:1px solid var(--line)}
+.num{display:grid;place-items:center;flex:0 0 30px;height:30px;border-radius:50%;background:var(--forest);color:white;font-family:Georgia,serif}
+.card-head h2{font-family:Georgia,serif;font-size:1.12rem;font-weight:500;color:var(--forest);margin:0}
+.card-head p{font-size:.8rem;color:var(--muted);margin:3px 0 0}
+.card-body{padding:18px}
+.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.fields.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+label{display:flex;flex-direction:column;gap:6px;color:#48564c;font-size:.79rem;font-weight:700;min-width:0}
+input,select,textarea{width:100%;min-width:0;border:1px solid #cdd5cb;border-radius:8px;background:#fff;padding:11px 12px;color:var(--ink);font:400 .94rem inherit;outline:none}
+input,select,textarea{font-family:inherit;font-size:.93rem}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px #b49a6224}
+.full{grid-column:1/-1}
+.subnote{font-size:.78rem;color:var(--muted);line-height:1.45;margin:0 0 12px}
+.payment-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.payment-tools{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.payment-tools label{min-width:190px;flex:1;max-width:300px}
+.payment-tools button{min-height:42px}
+.payment-validation{margin-top:12px;font-size:.88rem;font-weight:650}
+.payment-validation.ok{color:#26794e}
+.payment-validation.error{color:var(--danger)}
+.payment{border:1px solid var(--line);border-radius:10px;padding:12px;background:white}
+.payment h3{font-size:.84rem;color:var(--forest);margin:0 0 10px}
+.payment .fields{grid-template-columns:1fr 1fr;gap:9px}
+.payment label{font-size:.74rem}
+.payment input{padding:9px;font-size:.88rem}
+.financial-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.financial-strip label{background:#f0f2eb;padding:12px;border-radius:10px;border:1px solid var(--line)}
+.money-label-row{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;white-space:nowrap}
+.money-label-row .currency-label{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-width:2.2em;padding:3px 7px;border-radius:6px;background:#e2e8df;color:var(--forest);font-size:.76rem;font-weight:800;line-height:1.2}
+.payment .money-label-row .currency-label{font-size:.72rem;padding:2px 6px}
+.financial-strip input{background:white}
+.total-line{margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 16px;border-radius:10px;background:var(--forest);color:#fff}
+.total-line span:first-child{font-family:Georgia,serif;font-size:1.03rem}
+.total-line strong{font-size:1.12rem;letter-spacing:.02em}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;position:sticky;bottom:0;padding:12px;background:#eef0ebee;backdrop-filter:blur(10px);border:1px solid #d8ddd4;border-radius:14px;z-index:2}
+button{font:inherit;border:0;border-radius:9px;padding:13px 17px;font-weight:750;cursor:pointer}
+.primary{background:var(--forest);color:white}.primary:hover{background:var(--forest-2)}
+.secondary{background:white;border:1px solid var(--line);color:var(--forest)}
+.status{font-size:.84rem;color:var(--muted);flex:1}
+footer{max-width:1080px;margin:0 auto;padding:0 16px 28px;color:var(--muted);font-size:.76rem;line-height:1.5}
+@media(max-width:760px){
+ .header-inner{align-items:flex-start}.header-note{display:none}.brand{gap:10px}.brand-copy{font-size:.85rem;padding-left:10px}
+ .intro{display:block}.pill{display:inline-block;margin-top:12px}
+ .fields,.fields.two,.financial-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .payment-list{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+ main{padding:0 10px 30px}.card-body{padding:13px}.card-head{padding:12px 13px}
+ .fields,.fields.two,.financial-strip{grid-template-columns:1fr}
+ .full{grid-column:auto}.actions button{width:100%}.status{width:100%;flex:unset}
+ .brand img{width:175px}.brand-copy{display:none}
+}
+
+/* Acceso y administración local */
+.login-screen{min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(135deg,#eef0eb 0%,#dce4d9 100%)}
+.login-card{width:min(460px,100%);background:var(--paper);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 18px 55px #23382c18}
+.login-brand{background:var(--forest);border-bottom:4px solid var(--gold);padding:28px 24px;text-align:center}
+.login-brand img{width:min(270px,85%);max-height:78px;object-fit:contain;filter:brightness(0) invert(1)}
+.login-brand p{color:#d9dfd7;letter-spacing:.15em;text-transform:uppercase;font-size:.7rem;margin:14px 0 0}
+.login-content{padding:26px}
+.login-content h1{font-size:1.8rem;margin:0 0 7px}
+.login-content .sub{font-size:.9rem;color:var(--muted);line-height:1.5;margin:0 0 20px}
+.login-form{display:grid;gap:14px}
+.login-form label{display:flex;flex-direction:column;gap:6px}
+.login-form input,.admin-form input,.admin-form select{width:100%;padding:11px 12px;border:1px solid #cdd5cb;border-radius:8px;background:white;font:inherit;color:var(--ink)}
+.primary-btn,.secondary-btn,.danger-btn{border:0;border-radius:8px;padding:11px 15px;font:700 .9rem Inter,system-ui,sans-serif;cursor:pointer}
+.primary-btn{background:var(--forest);color:white}.secondary-btn{background:white;color:var(--forest);border:1px solid var(--line)}.danger-btn{background:#fff0ed;color:#963a30;border:1px solid #f0c8c0}
+.login-message{display:none;border-radius:8px;padding:10px 12px;font-size:.86rem;line-height:1.45}.login-message.show{display:block}.login-message.error{background:#fff0ed;color:#923a2d}.login-message.ok{background:#eaf4e8;color:#285b32}
+.login-footnote{margin:16px 0 0;font-size:.75rem;color:var(--muted);line-height:1.5}
+.app-toolbar{max-width:1080px;margin:12px auto 0;padding:0 16px;display:flex;justify-content:flex-end;gap:8px;align-items:center;flex-wrap:wrap}
+.admin-screen{min-height:100vh;background:#eef0eb;padding:26px 16px 44px}
+.admin-wrap{max-width:1000px;margin:auto}
+.admin-card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px;box-shadow:0 6px 22px #23382c0a}
+.admin-card h2{font-family:Georgia,serif;color:var(--forest);font-size:1.3rem;font-weight:500;margin:0 0 8px}
+.admin-card p{color:var(--muted);line-height:1.5}
+.admin-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.admin-form label{display:grid;gap:6px}
+.admin-form .full{grid-column:1/-1}
+.admin-users{display:grid;gap:9px}
+.admin-user{display:flex;align-items:center;justify-content:space-between;gap:12px;background:white;border:1px solid var(--line);border-radius:9px;padding:12px}
+.admin-user small{display:block;color:var(--muted);margin-top:4px}
+.role-chip{display:inline-block;border-radius:999px;background:var(--sage-2);color:var(--forest);font-size:.75rem;font-weight:800;padding:5px 9px}
+.hidden{display:none!important}
+@media(max-width:600px){.admin-form{grid-template-columns:1fr}.admin-form .full{grid-column:auto}.admin-user{align-items:flex-start;flex-direction:column}}
+.history-meta{color:var(--muted);font-size:.82rem;margin-top:5px;line-height:1.5}
+.history-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+
+</style>
+</head>
+<body>
+<section id="loginScreen" class="login-screen">
+ <div class="login-card">
+  <div class="login-brand"><img src="./logo-hacienda-santa-maria-white.png" alt="Hacienda Santa María"><p>Residencial · Naturaleza · Bienestar</p></div>
+  <div class="login-content">
+   <div class="eyebrow">Acceso al sistema</div><h1>Bienvenido</h1>
+   <p class="sub">Ingresá con tu cuenta para acceder al formulario de asignación.</p>
+   <form id="loginForm" class="login-form">
+    <label>Nombre de usuario<input id="loginUsername" autocomplete="username" required></label>
+    <label>Contraseña<input id="loginPassword" type="password" autocomplete="current-password" required></label>
+    <button class="primary-btn" type="submit">Iniciar sesión</button>
+    <div id="loginMessage" class="login-message" role="status" aria-live="polite"></div>
+   </form>
+   <p class="login-footnote">Acceso local de demostración. Las cuentas se guardan en este navegador y no se comparten automáticamente con otros equipos.</p>
+  </div>
+ </div>
+</section>
+<section id="adminScreen" class="admin-screen hidden">
+ <div class="admin-wrap">
+  <div class="intro"><div><div class="eyebrow">Control de acceso</div><h1>Administración de usuarios</h1><p>Creá cuentas y elegí si cada persona tendrá rol de administrador o usuario estándar.</p></div><button id="adminLogoutTop" class="secondary-btn">Cerrar sesión</button></div>
+  <div class="notice"><strong>Importante:</strong> esta versión es local y de demostración. Las contraseñas se guardan en el almacenamiento de este navegador. No usar para proteger datos reales ni publicarla como sistema seguro sin autenticación de servidor.</div>
+  <section class="admin-card">
+   <h2>Crear usuario</h2>
+   <form id="createUserForm" class="admin-form">
+    <label>Nombre de usuario<input id="newUsername" required minlength="3" maxlength="40" autocomplete="off" placeholder="Ej. asesor01"></label>
+    <label>Contraseña<input id="newPassword" required minlength="6" type="password" autocomplete="new-password" placeholder="Elegí una contraseña"></label>
+    <label>Nombre para mostrar (opcional)<input id="newDisplayName" maxlength="80" placeholder="Nombre de la persona"></label>
+    <label>Rol<select id="newRole"><option value="user">Usuario estándar</option><option value="admin">Administrador</option></select></label>
+    <div class="full"><button class="primary-btn" type="submit">Crear usuario</button></div>
+   </form>
+   <div id="adminMessage" class="login-message" role="status" aria-live="polite" style="margin-top:12px"></div>
+  </section>
+  <section class="admin-card"><h2>Usuarios registrados</h2><p>Podés cambiar roles o eliminar cuentas. No se muestran las contraseñas.</p><div id="adminUsers" class="admin-users"></div></section>
+  <div class="admin-card"><button id="adminBackForm" class="primary-btn">Volver al formulario</button></div>
+ </div>
+</section>
+<div id="appShell" class="hidden">
+
+<header>
+ <div class="header-inner">
+  <div class="brand"><img src="./logo-hacienda-santa-maria.png" alt="Hacienda Santa María"><div class="brand-copy">VIVIR EN<br>ARMONÍA</div></div>
+  <div class="header-note">Residencial · Naturaleza · Bienestar</div>
+ </div>
+</header>
+
+<div id="appToolbar" class="app-toolbar">
+ <span id="currentUserLabel" class="pill"></span>
+ <button id="openHistory" class="secondary-btn" type="button">Historial</button>
+ <button id="openAdmin" class="secondary-btn hidden" type="button">Administrar usuarios</button>
+ <button id="logoutButton" class="secondary-btn" type="button">Cerrar sesión</button>
+</div>
+
+<main>
+ <div class="intro">
+  <div><div class="eyebrow">Área comercial · Documento de asignación</div><h1>Formulario de asignación</h1><p>Datos del solicitante, propiedad y plan de pagos. Revisá la información antes de generar el documento para impresión y firma física.</p></div>
+  <div class="pill">Documento para impresión</div>
+ </div>
+ <div class="notice">Los datos del formulario se guardan en el historial local de este navegador al generar el PDF. Esta versión es de prueba: el historial no se comparte entre equipos hasta configurar el backend de Cloudflare.</div>
+ <form id="form">
+  <section class="card">
+   <div class="card-head"><span class="num">01</span><div><h2>Datos de la propiedad</h2><p>Identificación del inmueble asignado</p></div></div>
+   <div class="card-body"><div class="fields">
+    <label>Fecha del formulario<input name="fecha" type="date"></label>
+    <label>Finca<input name="finca"></label>
+    <label>Folio<input name="folio"></label>
+    <label>Libro<input name="libro"></label>
+    <label>Propiedad No.<input name="propiedad"></label>
+    <label>Área del terreno<input name="area"></label>
+   </div></div>
+  </section>
+  <section class="card">
+   <div class="card-head"><span class="num">02</span><div><h2>Datos personales</h2><p>Información del solicitante y documentos</p></div></div>
+   <div class="card-body"><div class="fields">
+    <label class="full">Nombre completo<input name="nombre" autocomplete="name" required></label>
+    <label>Fecha de nacimiento<input name="nacimiento" type="date"></label>
+    <label>Estado civil
+     <select name="estadoCivil">
+      <option value="">Seleccionar</option>
+      <option>Casado/a</option>
+      <option>Soltero/a</option>
+      <option>Divorciado/a</option>
+      <option>Viudo/a</option>
+     </select>
+    </label>
+    <label>Nacionalidad<input name="nacionalidad"></label>
+    <label class="full">Dirección para recibir correspondencia en Guatemala<input name="direccion" autocomplete="street-address"></label>
+    <label>Tipo de documento de identificación<select name="tipoDocumento"><option>DPI</option><option>Pasaporte</option><option>Otro</option></select></label>
+    <label>Número de identificación<input name="dpi"></label>
+    <label>Correo electrónico<input name="correo" type="email" autocomplete="email"></label>
+    <label>Teléfono celular<input name="telefono" type="tel" autocomplete="tel"></label>
+    <label>Ocupación del solicitante<input name="ocupacion"></label>
+    <label>Empresa donde labora<input name="empresa"></label>
+    <label>Documento a adjuntar
+     <select name="documentos">
+      <option value="">Seleccionar</option>
+      <option>DPI</option>
+      <option>Pasaporte</option>
+      <option>Otro</option>
+     </select>
+    </label>
+    <label>Copia del documento de identificación<select name="copiaDpi"><option value="">Seleccionar</option><option>Sí</option><option>No</option></select></label>
+    <label>Número de identificación tributaria (si tiene)<input name="nit"></label>
+   </div></div>
+  </section>
+  <section class="card">
+   <div class="card-head"><span class="num">03</span><div><h2>Resumen económico</h2><p>Montos pactados para la propiedad</p></div></div>
+   <div class="card-body"><div class="fields two" style="margin-bottom:14px;max-width:420px">
+    <label for="currency">Moneda de la operación<select id="currency" name="currency"><option value="GTQ">Quetzales (Q)</option><option value="USD">Dólares estadounidenses (US$)</option></select></label>
+   </div><div class="financial-strip">
+    <label><span class="money-label-row"><span>Precio de venta</span><span class="currency-label">Q</span></span><input name="precio" type="text" inputmode="decimal" autocomplete="off" placeholder="330,000.00"></label>
+    <label><span class="money-label-row"><span>Enganche pactado</span><span class="currency-label">Q</span></span><input name="enganche" type="text" inputmode="decimal" autocomplete="off" placeholder="46,000.00"></label>
+    <label><span class="money-label-row"><span>Saldo a financiar</span><span class="currency-label">Q</span></span><input name="saldo" type="text" inputmode="decimal" autocomplete="off" placeholder="184,000.00"></label>
+   </div></div>
+  </section>
+  <section class="card">
+   <div class="card-head"><span class="num">04</span><div><h2>Forma de pago</h2><p>Hasta 12 pagos · los campos no utilizados pueden quedar vacíos</p></div></div>
+   <div class="card-body">
+    <p class="subnote">Elegí cuántos meses tendrá el plan y generá una distribución inicial del enganche pactado. Los montos generados se pueden editar manualmente después; la suma se valida automáticamente.</p>
+    <div class="payment-tools">
+     <label for="paymentMonths">Cantidad de meses
+      <select id="paymentMonths" name="paymentMonths">
+       <option value="1">Mes 1</option>
+       <option value="2">Mes 2</option>
+       <option value="3">Mes 3</option>
+       <option value="4">Mes 4</option>
+       <option value="5">Mes 5</option>
+       <option value="6">Mes 6</option>
+       <option value="7">Mes 7</option>
+       <option value="8">Mes 8</option>
+       <option value="9">Mes 9</option>
+       <option value="10">Mes 10</option>
+       <option value="11">Mes 11</option>
+       <option value="12" selected>Mes 12</option>
+      </select>
+     </label>
+     <button id="generatePayments" class="primary-btn" type="button">Generar pagos</button>
+    </div>
+    <div id="paymentGenerationMessage" class="subnote" aria-live="polite"></div>
+    <div id="payments" class="payment-list"></div>
+    <div class="total-line"><span>Total de pagos</span><strong id="total">Q 0.00</strong></div>
+    <div id="paymentValidation" class="payment-validation" aria-live="polite"></div>
+   </div>
+  </section>
+  <section class="card">
+   <div class="card-head"><span class="num">05</span><div><h2>Firmas y constancia</h2><p>Espacios reservados para firma física</p></div></div>
+   <div class="card-body"><div class="fields two">
+    <label>Nombre del representante legal<input name="representante"></label>
+    <label>Fecha de entrega (confirmación)<input name="entregaConfirmacion" type="date"></label>
+   </div><p class="subnote" style="margin-top:14px">El PDF deja las líneas de firma en blanco para que el cliente y el representante firmen físicamente después de imprimir.</p></div>
+  </section>
+  <div class="actions"><button class="primary" type="submit">Generar PDF para imprimir</button><button class="secondary" type="reset">Limpiar formulario</button><span id="status" class="status" role="status"></span></div>
+ </form>
+</main>
+<footer>Hacienda Santa María · Formulario de asignación. La generación del PDF se realiza en el navegador. Mantener una copia segura del documento firmado conforme a los procesos internos de la empresa.</footer>
+</div><!-- /appShell -->
+<section id="historyScreen" class="admin-screen hidden">
+ <div class="admin-wrap">
+  <div class="intro"><div><div class="eyebrow">Documentos guardados</div><h1>Historial de formularios</h1><p>Los registros se guardan como versiones independientes. Al editar uno y generar un PDF, se agrega un nuevo registro sin borrar el anterior.</p></div><button id="historyBack" class="secondary-btn" type="button">Volver al formulario</button></div>
+  <div class="notice">Vista previa local. Los registros están guardados en este navegador y no son una base de datos compartida ni un control de seguridad entre usuarios.</div>
+  <section class="admin-card"><div id="historyList" class="admin-users"></div><p id="historyEmpty" class="subnote hidden">Todavía no hay formularios guardados.</p></section>
+ </div>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js" onerror="(function(){var s=document.createElement('script');s.src='https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js';document.head.appendChild(s)})()"></script>
+<script>
+const C=window.PDFLib?{forest:PDFColor('#263b31'),forest2:PDFColor('#354d40'),sage:PDFColor('#dce4d9'),pale:PDFColor('#edf1e9'),gold:PDFColor('#b49a62'),ink:PDFColor('#26312b'),muted:PDFColor('#69746c'),line:PDFColor('#d8ddd4'),paper:PDFColor('#fbfaf6'),white:PDFColor('#ffffff'),legal:PDFColor('#f4f1e7')}:{};
+function PDFColor(hex){const h=hex.replace('#','');return PDFLib.rgb(parseInt(h.slice(0,2),16)/255,parseInt(h.slice(2,4),16)/255,parseInt(h.slice(4,6),16)/255)}
+const form=document.getElementById('form'), payments=document.getElementById('payments');
+for(let i=1;i<=12;i++){
+ const el=document.createElement('div');el.className='payment';
+ el.innerHTML=`<h3>Pago ${i}${i===1?' · Reserva/arras':''}</h3><div class="fields"><label><span class="money-label-row"><span>Monto</span><span class="currency-label">Q</span></span><input name="pago${i}monto" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00"></label><label>Fecha<input name="pago${i}fecha" type="date"></label></div>`;
+ payments.appendChild(el);
+}
+const get=n=>(form.elements[n]?.value||'').trim();
+// Acepta 330000, 330,000, 330000.50 y 330,000.50.
+const parseMoney=value=>{let cleaned=String(value??'').replace(/Q/gi,'').replace(/\s/g,'');if(cleaned.includes('.')&&cleaned.includes(',')){cleaned=cleaned.replace(/,/g,'')}else if(cleaned.includes(',')){const parts=cleaned.split(',');if(parts.length===2&&/^\d{1,2}$/.test(parts[1]))cleaned=parts[0]+'.'+parts[1];else cleaned=cleaned.replace(/,/g,'')}if(!cleaned||cleaned==='.'||cleaned==='-')return 0;const n=Number(cleaned);return Number.isFinite(n)?n:0};
+const formatMoneyInput=value=>{const raw=String(value??'').trim();if(!raw)return '';const n=parseMoney(raw);return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})};
+const moneyInputNames=['precio','enganche','saldo',...Array.from({length:12},(_,i)=>`pago${i+1}monto`)];
+const dateGT=s=>{if(!s)return '';const [y,m,d]=s.split('-');return `${d}/${m}/${y}`};
+const currencySymbols={GTQ:'Q',USD:'US$'};
+const currencyCode=()=>form.elements.currency?.value||'GTQ';
+const currencySymbol=()=>currencySymbols[currencyCode()]||'Q';
+const money=n=>currencySymbol()+' '+Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+function updateCurrencyLabels(){document.querySelectorAll('.currency-label').forEach(el=>el.textContent=currencySymbol());updateTotal();}
+document.getElementById('currency').addEventListener('change',updateCurrencyLabels);
+const sumPayments=()=>Math.round(Array.from({length:12},(_,i)=>parseMoney(get(`pago${i+1}monto`))*100).reduce((a,b)=>a+b,0))/100;
+const engancheCents=()=>Math.round(Math.max(0,parseMoney(get('enganche'))*100));
+let generatedMonths=0;
+function updateSaldo(){
+ const precioText=get('precio'), engancheText=get('enganche');
+ const saldoInput=form.elements.namedItem('saldo');
+ if(!saldoInput)return;
+ if(!precioText && !engancheText){saldoInput.value='';return;}
+ const precioCents=Math.round(Math.max(0,parseMoney(precioText))*100);
+ const engancheCentsValue=Math.round(Math.max(0,parseMoney(engancheText))*100);
+ saldoInput.value=(Math.max(0,precioCents-engancheCentsValue)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function distributeRemainingPayments(months, firstPaymentCents){
+ const targetCents=engancheCents();
+ const count=Math.max(1,Math.min(12,months||1));
+ const first=Math.max(0,Math.min(targetCents,Math.round(firstPaymentCents||0)));
+ const firstInput=form.elements.namedItem('pago1monto');
+ if(firstInput)firstInput.value=(first/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+ const remaining=Math.max(0,targetCents-first);
+ const otherCount=count-1;
+ for(let i=2;i<=12;i++){
+  const input=form.elements.namedItem(`pago${i}monto`);
+  if(i<=count && otherCount>0){
+   const base=Math.floor(remaining/otherCount),remainder=remaining%otherCount;
+   const cents=base+((i-2)<remainder?1:0);
+   input.value=(cents/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  }else if(i>count){input.value='';}
+ }
+}
+function generatePayments(){
+ const months=Math.max(1,Math.min(12,Number(document.getElementById('paymentMonths').value)||1));
+ const enganche=parseMoney(get('enganche'));
+ const totalCents=Math.max(0,Math.round(enganche*100));
+ const message=document.getElementById('paymentGenerationMessage');
+ if(!get('enganche')||totalCents<=0){
+  message.textContent='Primero ingresá un enganche pactado mayor que cero. No se modificaron los pagos.';
+  updateTotal();
+  return;
+ }
+ // Guarda la cantidad de pagos activos para poder redistribuir el saldo al editar la reserva.
+ generatedMonths=months;
+ // Distribuye centavos enteros: los primeros pagos reciben el centavo sobrante.
+ const base=Math.floor(totalCents/months);
+ const remainder=totalCents%months;
+ for(let i=1;i<=12;i++){
+  const input=form.elements.namedItem(`pago${i}monto`);
+  if(i<=months){
+   const cents=base+(i<=remainder?1:0);
+   input.value=(cents/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  }else{
+   input.value='';
+  }
+ }
+ message.textContent=`Se generaron ${months} pagos que suman exactamente ${money(totalCents/100)}. Si modificás el Pago 1 · Reserva/arras, los pagos restantes se redistribuyen para conservar el total del enganche. Los demás montos siguen siendo editables.`;
+ updateTotal();
+}
+document.getElementById('generatePayments').addEventListener('click',generatePayments);
+function updateTotal(){
+ const total=sumPayments();
+ document.getElementById('total').textContent=money(total);
+ const target=parseMoney(get('enganche'));
+ const diff=Math.round((total-target)*100);
+ const validation=document.getElementById('paymentValidation');
+ if(!get('enganche')){
+  validation.textContent='Ingresá el enganche pactado para validar el total de los pagos.';
+  validation.className='payment-validation';
+ }else if(diff===0){
+  validation.textContent='✓ El total de los pagos coincide con el enganche pactado.';
+  validation.className='payment-validation ok';
+ }else if(diff<0){
+  validation.textContent=`Faltan ${money(Math.abs(diff)/100)} para completar el enganche pactado.`;
+  validation.className='payment-validation error';
+ }else{
+  validation.textContent=`Los pagos exceden el enganche pactado por ${money(diff/100)}.`;
+  validation.className='payment-validation error';
+ }
+}
+form.addEventListener('focusin',event=>{if(moneyInputNames.includes(event.target.name)){event.target.value=event.target.value.replace(/,/g,'').replace(/\.00$/,'')}});
+form.addEventListener('input',event=>{
+ if(!moneyInputNames.includes(event.target.name))return;
+ if(event.target.name==='precio'||event.target.name==='enganche')updateSaldo();
+ updateTotal();
+});
+form.addEventListener('focusout',event=>{
+ if(!moneyInputNames.includes(event.target.name))return;
+ event.target.value=formatMoneyInput(event.target.value);
+ if(event.target.name==='pago1monto' && generatedMonths>1){
+  distributeRemainingPayments(generatedMonths,Math.round(Math.max(0,parseMoney(event.target.value))*100));
+ }
+ if(event.target.name==='enganche' && generatedMonths>0){
+  const first=Math.round(Math.max(0,parseMoney(get('pago1monto')))*100);
+  distributeRemainingPayments(generatedMonths,first);
+ }
+ updateSaldo();updateTotal();
+});
+form.addEventListener('reset',()=>setTimeout(()=>{generatedMonths=0;updateCurrencyLabels();updateSaldo();updateTotal()},0));
+updateCurrencyLabels();
+updateSaldo();
+updateTotal();
+function drawText(page,font,text,x,y,size,color=C.ink,maxWidth=500){
+ if(text===undefined||text===null||String(text)==='')return;
+ let t=String(text);while(font.widthOfTextAtSize(t,size)>maxWidth&&t.length>1)t=t.slice(0,-1);
+ page.drawText(t,{x,y,size,font,color});
+}
+function wrapText(font,text,size,maxWidth){
+ const words=String(text).split(/\s+/);let lines=[],line='';
+ for(const w of words){const test=line?line+' '+w:w;if(font.widthOfTextAtSize(test,size)<=maxWidth)line=test;else{if(line)lines.push(line);line=w}}
+ if(line)lines.push(line);return lines;
+}
+function drawHeader(page,fonts,pageNo,sectionTitle){
+ const {width}=page.getSize();
+ page.drawRectangle({x:0,y:width?756:756,width:612,height:36,color:C.forest});
+ page.drawRectangle({x:0,y:752,width:612,height:4,color:C.gold});
+ drawText(page,fonts.bold,'HACIENDA SANTA MARÍA',40,769,9,C.white,280);
+ drawText(page,fonts.reg,'FORMULARIO DE ASIGNACIÓN',40,756,7,C.sage,300);
+ drawText(page,fonts.bold,sectionTitle,40,724,17,C.forest,470);
+ drawText(page,fonts.reg,`HSM  ·  ${String(pageNo).padStart(2,'0')} / 02`,520,22,7,C.muted,65);
+ page.drawLine({start:{x:40,y:34},end:{x:572,y:34},thickness:.7,color:C.line});
+}
+function section(page,fonts,title,x,y,w){
+ page.drawRectangle({x,y:y-5,width:w,height:23,color:C.pale});
+ page.drawRectangle({x,y:y-5,width:3,height:23,color:C.gold});
+ drawText(page,fonts.bold,title,x+11,y+2,9,C.forest,w-20);
+ return y-22;
+}
+function field(page,fonts,label,value,x,y,w,opts={}){
+ drawText(page,fonts.bold,label.toUpperCase(),x,y,6.2,C.muted,w);
+ drawText(page,fonts.reg,value||'',x,y-14,9,C.ink,w);
+ page.drawLine({start:{x,y:y-18},end:{x:x+w,y:y-18},thickness:.65,color:C.line});
+}
+function drawLabeledBox(page,fonts,label,value,x,y,w,h){
+ page.drawRectangle({x,y,width:w,height:h,radius:5,color:C.paper,borderColor:C.line,borderWidth:.7});
+ drawText(page,fonts.bold,label.toUpperCase(),x+9,y+h-13,6,C.muted,w-18);
+ drawText(page,fonts.reg,value||'',x+9,y+h-27,9,C.ink,w-18);
+}
+function escapeHTML(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
+function generatePrintFallback(){
+ const values=Array.from(form.elements).filter(el=>el.name).reduce((o,el)=>{o[el.name]=el.value||'';return o;},{});
+ const paymentsRows=Array.from({length:12},(_,i)=>{
+  const n=i+1, amount=values[`pago${n}monto`], date=dateGT(values[`pago${n}fecha`]);
+  return `<tr><td>${n===1?'Pago 1 · Reserva/arras':`Pago ${n}`}</td><td>${amount?escapeHTML(money(parseMoney(amount))):' '}</td><td>${escapeHTML(date)}</td></tr>`;
+ }).join('');
+ const total=money(sumPayments());
+ const fieldRow=(label,name)=>{const val=values[name]||'';const shown=moneyInputNames.includes(name)&&val?formatMoneyInput(val):val;return `<div class="field"><b>${escapeHTML(label)}</b><span>${escapeHTML(shown)}</span></div>`};
+ const w=window.open('','_blank');
+ if(!w){document.getElementById('status').textContent='El navegador bloqueó la ventana de impresión. Permití las ventanas emergentes e intentá de nuevo.';return;}
+ w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>HSM_Formulario_Asignacion</title><style>
+ @page{size:A4;margin:6mm}*{box-sizing:border-box}body{font:8px Arial,sans-serif;color:#26312b;margin:0;zoom:.82}header{background:#263b31;color:white;padding:16px 18px;border-bottom:4px solid #b49a62}h1{font:24px Georgia,serif;margin:20px 0 5px;color:#263b31}h2{font:14px Georgia,serif;background:#edf1e9;border-left:3px solid #b49a62;padding:7px;margin:14px 0 8px}p{color:#69746c}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 14px}.field{border-bottom:1px solid #d8ddd4;min-height:30px;padding:3px 0;overflow-wrap:anywhere}.field b{display:block;font-size:8px;text-transform:uppercase;color:#69746c;margin-bottom:3px}.money{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.money .field{background:#edf1e9;padding:8px;border:0}table{width:100%;border-collapse:collapse;margin-top:8px}th{background:#263b31;color:white;text-align:left}td,th{padding:7px;border:1px solid #d8ddd4}tr:nth-child(even){background:#edf1e9}.signatures{display:grid;grid-template-columns:1fr 1fr;gap:35px;margin-top:40px}.sig{border-top:1px solid #263b31;padding-top:8px;margin-top:28px}.note{font-size:9px;background:#f4f1e7;padding:9px;margin-top:12px}footer{font-size:9px;color:#69746c;margin-top:18px}@media print{button{display:none}}
+ </style></head><body><header><b>HACIENDA SANTA MARÍA</b><div>FORMULARIO DE ASIGNACIÓN</div></header><h1>Solicitud de asignación</h1><p>Información del solicitante y de la propiedad</p><h2>01 · Datos de la propiedad</h2><div class="grid">${fieldRow('Fecha','fecha')}${fieldRow('Finca','finca')}${fieldRow('Folio','folio')}${fieldRow('Libro','libro')}${fieldRow('Propiedad No.','propiedad')}${fieldRow('Área del terreno','area')}</div><h2>02 · Datos personales</h2><div class="grid">${fieldRow('Nombre completo','nombre')}${fieldRow('Fecha de nacimiento','nacimiento')}${fieldRow('Estado civil','estadoCivil')}${fieldRow('Nacionalidad','nacionalidad')}${fieldRow('Dirección','direccion')}${fieldRow('Tipo de documento','tipoDocumento')}${fieldRow('Número de identificación','dpi')}${fieldRow('NIT','nit')}${fieldRow('Correo electrónico','correo')}${fieldRow('Teléfono celular','telefono')}${fieldRow('Ocupación','ocupacion')}${fieldRow('Empresa donde labora','empresa')}${fieldRow('Documentos a adjuntar','documentos')}${fieldRow('Copia del documento','copiaDpi')}</div><h2>03 · Resumen económico</h2><div class="money">${fieldRow(`Precio de venta (${currencySymbol()})`,'precio')}${fieldRow(`Enganche pactado (${currencySymbol()})`,'enganche')}${fieldRow(`Saldo a financiar (${currencySymbol()})`,'saldo')}</div><h2>04 · Plan de pagos</h2><table><thead><tr><th>Forma de pago</th><th>Monto</th><th>Fecha</th></tr></thead><tbody>${paymentsRows}<tr><th>TOTAL DE PAGOS</th><th>${escapeHTML(total)}</th><th></th></tr></tbody></table><div class="note">Reserva y arras: verificar las condiciones pactadas en el documento contractual. Gastos de cierre no incluidos en el precio de venta: gastos legales, timbres de acción y gastos de conexión.</div><h2>05 · Firmas y constancia</h2>${fieldRow('Fecha de entrega (confirmación)','entregaConfirmacion')}<div class="signatures"><div class="sig">Firma del cliente</div><div class="sig">Nombre y firma del representante legal<br>${escapeHTML(values.representante||'')}</div></div><footer>Hacienda Santa María · Documento de una página para revisión e impresión.</footer><script>window.addEventListener('load',()=>setTimeout(()=>window.print(),300));<\/script>
+</body></html>`);
+ w.document.close();
+ document.getElementById('status').textContent='Se abrió una versión imprimible de una página. En el diálogo elegí “Guardar como PDF”.';
+}
+async function generatePDF(){
+ const status=document.getElementById('status');
+ try{
+  if(!window.PDFLib){generatePrintFallback();if(window.HSMHistory)await window.HSMHistory.saveCurrent();return;}
+  const enganche=parseMoney(get('enganche'));
+  if(!get('enganche')) throw new Error('Ingresá el enganche pactado antes de generar el PDF.');
+  if(Math.round(sumPayments()*100)!==Math.round(enganche*100)){
+   updateTotal();
+   throw new Error('No se puede generar el PDF: la suma de los pagos debe coincidir exactamente con el enganche pactado.');
+  }
+  status.textContent='Generando documento de una página…';
+  const {PDFDocument,StandardFonts}=PDFLib;
+  const pdf=await PDFDocument.create();
+  const fonts={reg:await pdf.embedFont(StandardFonts.Helvetica),bold:await pdf.embedFont(StandardFonts.HelveticaBold),serif:await pdf.embedFont(StandardFonts.TimesRoman),serifBold:await pdf.embedFont(StandardFonts.TimesRomanBold)};
+  let logo=null;try{const b=await (await fetch('./logo-hacienda-santa-maria-white.png')).arrayBuffer();logo=await pdf.embedPng(b)}catch{}
+  const p=pdf.addPage([595.28,841.89]);
+  p.drawRectangle({x:0,y:0,width:595.28,height:841.89,color:C.paper});
+  p.drawRectangle({x:0,y:797,width:595.28,height:44.89,color:C.forest});
+  p.drawRectangle({x:0,y:793,width:595.28,height:4,color:C.gold});
+  if(logo)p.drawImage(logo,{x:28,y:805,width:132,height:30});
+  else drawText(p,fonts.serifBold,'HACIENDA SANTA MARÍA',28,816,12,C.white,250);
+  drawText(p,fonts.reg,'FORMULARIO DE ASIGNACIÓN',380,817,7,C.sage,185);
+  drawText(p,fonts.serif,'Solicitud de asignación',28,773,17,C.forest,340);
+  drawText(p,fonts.reg,'INFORMACIÓN DEL SOLICITANTE Y DE LA PROPIEDAD',28,760,6.5,C.muted,380);
+  p.drawRectangle({x:453,y:754,width:114,height:25,radius:5,color:C.pale,borderColor:C.line,borderWidth:.5});
+  drawText(p,fonts.bold,'FECHA',461,768,5.5,C.muted,95);
+  drawText(p,fonts.reg,dateGT(get('fecha')),461,758,7,C.ink,95);
+  let y=744;
+  const sec=(title)=>{p.drawRectangle({x:28,y:y-4,width:539,height:16,color:C.pale});p.drawRectangle({x:28,y:y-4,width:3,height:16,color:C.gold});drawText(p,fonts.bold,title,37,y+1,7,C.forest,520);y-=20};
+  const row=(items)=>{
+    const gap=10, totalW=539, w=(totalW-gap*(items.length-1))/items.length;
+    items.forEach((it,i)=>{const x=28+i*(w+gap);drawText(p,fonts.bold,it[0].toUpperCase(),x,y,5.2,C.muted,w);drawText(p,fonts.reg,it[1]||'—',x,y-9,6.8,C.ink,w);p.drawLine({start:{x,y:y-12},end:{x:x+w,y:y-12},thickness:.45,color:C.line})});
+    y-=17;
+  };
+  sec('01 · DATOS DE LA PROPIEDAD');
+  row([['Finca',get('finca')],  ['Folio',get('folio')],['Libro',get('libro')],['Propiedad No.',get('propiedad')]]);
+  row([['Área del terreno',get('area')]]);
+   y -=12;
+  sec('02 · DATOS PERSONALES');
+  row([['Nombre completo',get('nombre')]]);
+  row([['Fecha de nacimiento',dateGT(get('nacimiento'))],['Estado civil',get('estadoCivil')],['Nacionalidad',get('nacionalidad')]]);
+  row([['Dirección para correspondencia',get('direccion')]]);
+  row([['Tipo de documento',get('tipoDocumento')],['Número de identificación',get('dpi')],['NIT',get('nit')]]);
+  row([['Correo electrónico',get('correo')],['Teléfono celular',get('telefono')]]);
+  row([['Ocupación',get('ocupacion')],['Empresa donde labora',get('empresa')]]);
+  row([['Documentos a adjuntar',get('documentos')],['Copia del documento',get('copiaDpi')]]);
+   y -=12;
+  sec('03 · RESUMEN ECONÓMICO');
+  const bx=28,bw=173,by=y-27;
+  [['PRECIO DE VENTA',get('precio')?money(parseMoney(get('precio'))):'—'],['ENGANCHE PACTADO',get('enganche')?money(parseMoney(get('enganche'))):'—'],['SALDO A FINANCIAR',get('saldo')?money(parseMoney(get('saldo'))):'—']].forEach((it,i)=>{const x=bx+i*183;p.drawRectangle({x,y:by,width:bw,height:25,radius:4,color:C.white,borderColor:C.line,borderWidth:.5});drawText(p,fonts.bold,it[0],x+7,by+15,5.2,C.muted,bw-14);drawText(p,fonts.reg,it[1],x+7,by+5,7,C.forest,bw-14)});
+  y=by-11;
+  drawText(p,fonts.reg,`Importes en ${currencyCode()==='USD'?'dólares estadounidenses (US$)':'quetzales (Q)'}.`,28,y,5.5,C.muted,539);y-=12;
+   y -=10;
+  sec('04 · PLAN DE PAGOS');
+  const tx=28,tw=539, labelW=250, amountW=150, dateW=139, rowH=11.5, top=y;
+  p.drawRectangle({x:tx,y:top-12,width:tw,height:12,color:C.forest});
+  drawText(p,fonts.bold,'FORMA DE PAGO',tx+7,top-8.5,5.4,C.white,labelW-12);
+  drawText(p,fonts.bold,'MONTO',tx+labelW+5,top-8.5,5.4,C.white,amountW-10);
+  drawText(p,fonts.bold,'FECHA',tx+labelW+amountW+5,top-8.5,5.4,C.white,dateW-10);
+  for(let i=1;i<=12;i++){
+    const yy=top-12-i*rowH;
+    p.drawRectangle({x:tx,y:yy,width:tw,height:rowH,color:i%2?C.white:C.pale,borderColor:C.line,borderWidth:.25});
+    drawText(p,fonts.reg,i===1?'Pago 1 · Reserva/arras':`Pago ${i}`,tx+7,yy+3.3,5.5,C.ink,labelW-12);
+    const val=get(`pago${i}monto`);
+    if(val)drawText(p,fonts.reg,money(parseMoney(val)),tx+labelW+5,yy+3.3,5.5,C.ink,amountW-10);
+    drawText(p,fonts.reg,dateGT(get(`pago${i}fecha`)),tx+labelW+amountW+5,yy+3.3,5.5,C.ink,dateW-10);
+  }
+  const totalY=top-12-12*rowH-13;
+  p.drawRectangle({x:tx,y:totalY,width:tw,height:12,radius:3,color:C.sage,borderColor:C.line,borderWidth:.4});
+  drawText(p,fonts.bold,'TOTAL DE PAGOS',tx+7,totalY+3.5,5.8,C.forest,200);
+  drawText(p,fonts.bold,money(sumPayments()),tx+labelW+5,totalY+3.5,6,C.forest,amountW-10);
+  y=totalY-9;
+  const legal='Reserva y arras: el monto no es reembolsable conforme a las condiciones contractuales aplicables. Gastos de cierre no incluidos en el precio: gastos legales, timbres de acción y gastos de conexión.';
+  p.drawRectangle({x:28,y:y-25,width:539,height:25,radius:3,color:C.legal,borderColor:PDFColor('#e2d8bf'),borderWidth:.4});
+  wrapText(fonts.reg,legal,5.3,523).slice(0,3).forEach((line,i)=>drawText(p,fonts.reg,line,36,y-9-i*6.5,5.3,C.ink,523));
+  y-=39;
+  drawText(p,fonts.bold,'FECHA DE ENTREGA',28,y,5.2,C.muted,130);
+   y -=30;
+  drawText(p,fonts.reg,dateGT(get('entregaConfirmacion'))||'—',28,y-9,6.2,C.ink,130);
+  p.drawLine({start:{x:180,y:y-5},end:{x:350,y:y-5},thickness:.6,color:C.forest});
+  drawText(p,fonts.reg,'Firma del cliente',180,y-14,5.5,C.muted,170);
+  p.drawLine({start:{x:375,y:y-5},end:{x:567,y:y-5},thickness:.6,color:C.forest});
+  drawText(p,fonts.reg,'Firma del representante legal',375,y-14,5.5,C.muted,192);
+  if(get('representante'))drawText(p,fonts.reg,get('representante'),375,y-22,5.5,C.ink,192);
+  p.drawLine({start:{x:28,y:22},end:{x:567,y:22},thickness:.5,color:C.line});
+  drawText(p,fonts.reg,'Hacienda Santa María · Documento comercial para revisión e impresión',28,11,5.2,C.muted,500);
+  const bytes=await pdf.save();
+  const blob=new Blob([bytes],{type:'application/pdf'}),url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='HSM_Formulario_Asignacion.pdf';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
+  if(window.HSMHistory)await window.HSMHistory.saveCurrent();
+  status.textContent='PDF de una página descargado. Revisá la vista previa antes de imprimir.';
+ }catch(err){console.error(err);status.textContent=err.message||'No se pudo generar el PDF.'}
+}
+form.addEventListener('submit',e=>{e.preventDefault();generatePDF()});
+updateCurrencyLabels();
+updateSaldo();
+updateTotal();
+</script>
+<script>
+/* Autenticación, usuarios e historial mediante la API del Worker. */
+(function(){
+ const $=id=>document.getElementById(id);
+ const API='/api';
+ let activeUser=null;
+ let editingParentId=null;
+ let historyCache=[];
+ const form=document.getElementById('mainForm')||document.querySelector('form[data-main-form]')||document.querySelector('#appShell form');
+ async function api(path,options={}){
+  const response=await fetch(API+path,{...options,credentials:'same-origin',headers:{'content-type':'application/json',...(options.headers||{})}});
+  if(response.status===204)return null;
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok){const error=new Error(data.error||'No se pudo completar la solicitud.');error.status=response.status;throw error;}
+  return data;
+ }
+ function setMessage(el,text,type){el.textContent=text;el.className='login-message show '+type}
+ function show(which){
+  $('loginScreen').classList.toggle('hidden',which!=='login');
+  $('adminScreen').classList.toggle('hidden',which!=='admin');
+  $('appShell').classList.toggle('hidden',which!=='form');
+  $('historyScreen').classList.toggle('hidden',which!=='history');
+ }
+ function renderApp(){
+  if(!activeUser){show('login');return;}
+  $('currentUserLabel').textContent=(activeUser.displayName||activeUser.username)+' · '+(activeUser.role==='admin'?'Administrador':'Usuario estándar');
+  $('openAdmin').classList.toggle('hidden',activeUser.role!=='admin');
+  show('form');
+ }
+ async function restoreSession(){
+  try{const data=await api('/auth/me');activeUser=data.user;renderApp();}
+  catch{activeUser=null;show('login');}
+ }
+ async function renderUsers(){
+  const list=$('adminUsers');list.replaceChildren();
+  try{
+   const data=await api('/users');
+   data.users.forEach(u=>{
+    const row=document.createElement('div');row.className='admin-user';
+    const info=document.createElement('div');
+    const strong=document.createElement('strong');strong.textContent=u.username;
+    const detail=document.createElement('small');detail.textContent=(u.display_name||u.username)+' · '+(u.role==='admin'?'Administrador':'Usuario estándar');
+    info.append(strong,detail);
+    const actions=document.createElement('div');actions.style.cssText='display:flex;gap:8px;align-items:center;flex-wrap:wrap';
+    const select=document.createElement('select');select.className='role-chip';select.setAttribute('aria-label','Rol de '+u.username);
+    [['admin','Administrador'],['user','Usuario estándar']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;o.selected=u.role===v;select.append(o)});
+    select.addEventListener('change',async()=>{try{await api('/users/'+u.id,{method:'PATCH',body:JSON.stringify({role:select.value})});await renderUsers();setMessage($('adminMessage'),'Rol actualizado.','ok');}catch(e){select.value=u.role;setMessage($('adminMessage'),e.message,'error');}});
+    const del=document.createElement('button');del.type='button';del.className='danger-btn';del.textContent='Desactivar';
+    del.addEventListener('click',async()=>{if(!confirm('¿Desactivar el usuario "'+u.username+'"?'))return;try{await api('/users/'+u.id,{method:'DELETE'});await renderUsers();setMessage($('adminMessage'),'Usuario desactivado.','ok');}catch(e){setMessage($('adminMessage'),e.message,'error');}});
+    actions.append(select,del);row.append(info,actions);list.append(row);
+   });
+  }catch(e){setMessage($('adminMessage'),e.message,'error');}
+ }
+ $('loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();const username=$('loginUsername').value.trim(),password=$('loginPassword').value;
+  try{const data=await api('/auth/login',{method:'POST',body:JSON.stringify({username,password})});activeUser=data.user;$('loginPassword').value='';setMessage($('loginMessage'),'','ok');renderApp();}
+  catch(err){setMessage($('loginMessage'),err.message,'error');}
+ });
+ $('openAdmin').addEventListener('click',async()=>{if(!activeUser||activeUser.role!=='admin'){renderApp();return;}await renderUsers();show('admin');});
+ $('adminBackForm').addEventListener('click',renderApp);
+ $('adminLogoutTop').addEventListener('click',logout);
+ $('logoutButton').addEventListener('click',logout);
+ async function logout(){try{await api('/auth/logout',{method:'POST'});}catch{}activeUser=null;show('login');$('loginPassword').value='';}
+ $('createUserForm').addEventListener('submit',async e=>{
+  e.preventDefault();const username=$('newUsername').value.trim(),password=$('newPassword').value,displayName=$('newDisplayName').value.trim(),role=$('newRole').value;
+  if(!/^[a-zA-Z0-9._-]{3,40}$/.test(username)){setMessage($('adminMessage'),'Usá 3 a 40 caracteres: letras, números, punto, guion o guion bajo.','error');return;}
+  if(password.length<12){setMessage($('adminMessage'),'La contraseña debe tener al menos 12 caracteres.','error');return;}
+  try{await api('/users',{method:'POST',body:JSON.stringify({username,password,displayName:displayName||username,role})});$('createUserForm').reset();await renderUsers();setMessage($('adminMessage'),'Usuario creado correctamente.','ok');}
+  catch(err){setMessage($('adminMessage'),err.message,'error');}
+ });
+ function collectValues(){return Array.from(form.elements).filter(el=>el.name).reduce((o,el)=>{o[el.name]=el.value||'';return o;},{});}
+ async function saveCurrentHistory(){
+  if(!activeUser)return;
+  try{await api('/records',{method:'POST',body:JSON.stringify({parent_id:editingParentId,form_data:collectValues()})});editingParentId=null;}
+  catch(e){$('status').textContent='El PDF se generó, pero no se pudo guardar en el historial: '+e.message;}
+ }
+ window.HSMHistory={saveCurrent:saveCurrentHistory};
+ async function renderHistory(){
+  if(!activeUser){renderApp();return;}
+  const list=$('historyList');list.replaceChildren();
+  try{
+   const data=await api('/records');historyCache=(data.records||[]).map(r=>({id:r.id,parentId:r.parent_id,createdAt:r.created_at,createdBy:r.created_by,createdByName:r.created_by,values:r.form_data||{}}));
+   $('historyEmpty').classList.toggle('hidden',historyCache.length>0);
+   historyCache.forEach(r=>{
+    const row=document.createElement('div');row.className='admin-user';const info=document.createElement('div');
+    const title=document.createElement('strong');title.textContent=(r.values.nombre||'Formulario sin nombre')+' · '+(r.values.propiedad?'Propiedad '+r.values.propiedad:'Sin número de propiedad');
+    const meta=document.createElement('div');meta.className='history-meta';meta.textContent='Creado por: '+r.createdByName+' · '+new Date(r.createdAt.replace(' ','T')+'Z').toLocaleString('es-GT')+(r.parentId?' · Versión corregida':'');
+    const detail=document.createElement('div');detail.className='history-meta';detail.textContent='Fecha del formulario: '+(r.values.fecha||'Sin fecha')+' · Moneda: '+(r.values.currency==='USD'?'US$':'Q');info.append(title,meta,detail);
+    const actions=document.createElement('div');actions.className='history-actions';
+    const edit=document.createElement('button');edit.type='button';edit.className='primary-btn';edit.textContent='Editar';
+    edit.addEventListener('click',()=>{Object.entries(r.values||{}).forEach(([name,value])=>{const el=form.elements.namedItem(name);if(el&&'value'in el)el.value=value;});editingParentId=r.id;updateCurrencyLabels();updateSaldo();updateTotal();show('form');$('status').textContent='Formulario cargado desde el historial. Al generar el PDF se guardará una nueva versión.';window.scrollTo({top:0,behavior:'smooth'});});
+    const remove=document.createElement('button');remove.type='button';remove.className='danger-btn';remove.textContent='Eliminar registro';
+    remove.addEventListener('click',async()=>{if(!confirm('¿Eliminar este registro del historial? Esta acción no se puede deshacer.'))return;try{await api('/records/'+r.id,{method:'DELETE'});await renderHistory();}catch(e){alert(e.message);}});
+    actions.append(edit,remove);row.append(info,actions);list.append(row);
+   });
+  }catch(e){$('historyEmpty').classList.remove('hidden');$('historyEmpty').textContent=e.message;}
+ }
+ $('openHistory').addEventListener('click',async()=>{if(!activeUser){show('login');return;}await renderHistory();show('history');});
+ $('historyBack').addEventListener('click',renderApp);
+ restoreSession();
+})();
+
+</script>
+</body>
+</html>

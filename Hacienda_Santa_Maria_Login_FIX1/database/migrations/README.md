@@ -1,0 +1,1 @@
+La primera estructura está en ../schema.sql. Para producción, crear una migración versionada antes de cambios posteriores.

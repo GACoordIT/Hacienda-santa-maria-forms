@@ -112,6 +112,9 @@ footer{max-width:1080px;margin:0 auto;padding:0 16px 28px;color:var(--muted);fon
 .role-chip{display:inline-block;border-radius:999px;background:var(--sage-2);color:var(--forest);font-size:.75rem;font-weight:800;padding:5px 9px}
 .hidden{display:none!important}
 @media(max-width:600px){.admin-form{grid-template-columns:1fr}.admin-form .full{grid-column:auto}.admin-user{align-items:flex-start;flex-direction:column}}
+.history-meta{color:var(--muted);font-size:.82rem;margin-top:5px;line-height:1.5}
+.history-actions{display:flex;gap:8px;flex-wrap:wrap}
+
 
 </style>
 </head>
@@ -162,6 +165,7 @@ footer{max-width:1080px;margin:0 auto;padding:0 16px 28px;color:var(--muted);fon
 
 <div id="appToolbar" class="app-toolbar">
  <span id="currentUserLabel" class="pill"></span>
+ <button id="openHistory" class="secondary-btn" type="button">Historial</button>
  <button id="openAdmin" class="secondary-btn hidden" type="button">Administrar usuarios</button>
  <button id="logoutButton" class="secondary-btn" type="button">Cerrar sesión</button>
 </div>
@@ -171,7 +175,7 @@ footer{max-width:1080px;margin:0 auto;padding:0 16px 28px;color:var(--muted);fon
   <div><div class="eyebrow">Área comercial · Documento de asignación</div><h1>Formulario de asignación</h1><p>Datos del solicitante, propiedad y plan de pagos. Revisá la información antes de generar el documento para impresión y firma física.</p></div>
   <div class="pill">Documento para impresión</div>
  </div>
- <div class="notice">Los datos se utilizan únicamente para generar el PDF en este navegador. Esta página no envía ni almacena la información del cliente en un servidor.</div>
+ <div class="notice">Los datos del formulario se guardan en el historial local de este navegador al generar el PDF. Esta versión es de prueba: el historial no se comparte entre equipos hasta configurar el backend de Cloudflare.</div>
  <form id="form">
   <section class="card">
    <div class="card-head"><span class="num">01</span><div><h2>Datos de la propiedad</h2><p>Identificación del inmueble asignado</p></div></div>
@@ -231,7 +235,27 @@ footer{max-width:1080px;margin:0 auto;padding:0 16px 28px;color:var(--muted);fon
   <section class="card">
    <div class="card-head"><span class="num">04</span><div><h2>Forma de pago</h2><p>Hasta 12 pagos · los campos no utilizados pueden quedar vacíos</p></div></div>
    <div class="card-body">
-    <p class="subnote">Ingresá manualmente el monto y la fecha acordados para cada pago. Podés escribir cantidades como 330000 o 330,000. El sistema mostrará los centavos en formato 330,000.00 al salir del campo y actualizará la suma automáticamente, sin modificar los montos que ingreses.</p>
+    <p class="subnote">Elegí cuántos meses tendrá el plan y generá una distribución inicial del enganche pactado. Los montos generados se pueden editar manualmente después; la suma se valida automáticamente.</p>
+    <div class="payment-tools">
+     <label for="paymentMonths">Cantidad de meses
+      <select id="paymentMonths" name="paymentMonths">
+       <option value="1">Mes 1</option>
+       <option value="2">Mes 2</option>
+       <option value="3">Mes 3</option>
+       <option value="4">Mes 4</option>
+       <option value="5">Mes 5</option>
+       <option value="6">Mes 6</option>
+       <option value="7">Mes 7</option>
+       <option value="8">Mes 8</option>
+       <option value="9">Mes 9</option>
+       <option value="10">Mes 10</option>
+       <option value="11">Mes 11</option>
+       <option value="12" selected>Mes 12</option>
+      </select>
+     </label>
+     <button id="generatePayments" class="primary-btn" type="button">Generar pagos</button>
+    </div>
+    <div id="paymentGenerationMessage" class="subnote" aria-live="polite"></div>
     <div id="payments" class="payment-list"></div>
     <div class="total-line"><span>Total de pagos</span><strong id="total">Q 0.00</strong></div>
     <div id="paymentValidation" class="payment-validation" aria-live="polite"></div>
@@ -249,6 +273,13 @@ footer{max-width:1080px;margin:0 auto;padding:0 16px 28px;color:var(--muted);fon
 </main>
 <footer>Hacienda Santa María · Formulario de asignación. La generación del PDF se realiza en el navegador. Mantener una copia segura del documento firmado conforme a los procesos internos de la empresa.</footer>
 </div><!-- /appShell -->
+<section id="historyScreen" class="admin-screen hidden">
+ <div class="admin-wrap">
+  <div class="intro"><div><div class="eyebrow">Documentos guardados</div><h1>Historial de formularios</h1><p>Los registros se guardan como versiones independientes. Al editar uno y generar un PDF, se agrega un nuevo registro sin borrar el anterior.</p></div><button id="historyBack" class="secondary-btn" type="button">Volver al formulario</button></div>
+  <div class="notice">Vista previa local. Los registros están guardados en este navegador y no son una base de datos compartida ni un control de seguridad entre usuarios.</div>
+  <section class="admin-card"><div id="historyList" class="admin-users"></div><p id="historyEmpty" class="subnote hidden">Todavía no hay formularios guardados.</p></section>
+ </div>
+</section>
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js" onerror="(function(){var s=document.createElement('script');s.src='https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js';document.head.appendChild(s)})()"></script>
 <script>
 const C=window.PDFLib?{forest:PDFColor('#263b31'),forest2:PDFColor('#354d40'),sage:PDFColor('#dce4d9'),pale:PDFColor('#edf1e9'),gold:PDFColor('#b49a62'),ink:PDFColor('#26312b'),muted:PDFColor('#69746c'),line:PDFColor('#d8ddd4'),paper:PDFColor('#fbfaf6'),white:PDFColor('#ffffff'),legal:PDFColor('#f4f1e7')}:{};
@@ -273,6 +304,61 @@ function updateCurrencyLabels(){document.querySelectorAll('.currency-label').for
 document.getElementById('currency').addEventListener('change',updateCurrencyLabels);
 const sumPayments=()=>Math.round(Array.from({length:12},(_,i)=>parseMoney(get(`pago${i+1}monto`))*100).reduce((a,b)=>a+b,0))/100;
 const engancheCents=()=>Math.round(Math.max(0,parseMoney(get('enganche'))*100));
+let generatedMonths=0;
+function updateSaldo(){
+ const precioText=get('precio'), engancheText=get('enganche');
+ const saldoInput=form.elements.namedItem('saldo');
+ if(!saldoInput)return;
+ if(!precioText && !engancheText){saldoInput.value='';return;}
+ const precioCents=Math.round(Math.max(0,parseMoney(precioText))*100);
+ const engancheCentsValue=Math.round(Math.max(0,parseMoney(engancheText))*100);
+ saldoInput.value=(Math.max(0,precioCents-engancheCentsValue)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function distributeRemainingPayments(months, firstPaymentCents){
+ const targetCents=engancheCents();
+ const count=Math.max(1,Math.min(12,months||1));
+ const first=Math.max(0,Math.min(targetCents,Math.round(firstPaymentCents||0)));
+ const firstInput=form.elements.namedItem('pago1monto');
+ if(firstInput)firstInput.value=(first/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+ const remaining=Math.max(0,targetCents-first);
+ const otherCount=count-1;
+ for(let i=2;i<=12;i++){
+  const input=form.elements.namedItem(`pago${i}monto`);
+  if(i<=count && otherCount>0){
+   const base=Math.floor(remaining/otherCount),remainder=remaining%otherCount;
+   const cents=base+((i-2)<remainder?1:0);
+   input.value=(cents/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  }else if(i>count){input.value='';}
+ }
+}
+function generatePayments(){
+ const months=Math.max(1,Math.min(12,Number(document.getElementById('paymentMonths').value)||1));
+ const enganche=parseMoney(get('enganche'));
+ const totalCents=Math.max(0,Math.round(enganche*100));
+ const message=document.getElementById('paymentGenerationMessage');
+ if(!get('enganche')||totalCents<=0){
+  message.textContent='Primero ingresá un enganche pactado mayor que cero. No se modificaron los pagos.';
+  updateTotal();
+  return;
+ }
+ // Guarda la cantidad de pagos activos para poder redistribuir el saldo al editar la reserva.
+ generatedMonths=months;
+ // Distribuye centavos enteros: los primeros pagos reciben el centavo sobrante.
+ const base=Math.floor(totalCents/months);
+ const remainder=totalCents%months;
+ for(let i=1;i<=12;i++){
+  const input=form.elements.namedItem(`pago${i}monto`);
+  if(i<=months){
+   const cents=base+(i<=remainder?1:0);
+   input.value=(cents/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  }else{
+   input.value='';
+  }
+ }
+ message.textContent=`Se generaron ${months} pagos que suman exactamente ${money(totalCents/100)}. Si modificás el Pago 1 · Reserva/arras, los pagos restantes se redistribuyen para conservar el total del enganche. Los demás montos siguen siendo editables.`;
+ updateTotal();
+}
+document.getElementById('generatePayments').addEventListener('click',generatePayments);
 function updateTotal(){
  const total=sumPayments();
  document.getElementById('total').textContent=money(total);
@@ -294,10 +380,26 @@ function updateTotal(){
  }
 }
 form.addEventListener('focusin',event=>{if(moneyInputNames.includes(event.target.name)){event.target.value=event.target.value.replace(/,/g,'').replace(/\.00$/,'')}});
-form.addEventListener('input',event=>{if(moneyInputNames.includes(event.target.name))updateTotal()});
-form.addEventListener('focusout',event=>{if(moneyInputNames.includes(event.target.name)){event.target.value=formatMoneyInput(event.target.value);updateTotal()}});
-form.addEventListener('reset',()=>setTimeout(()=>{updateCurrencyLabels();updateTotal()},0));
+form.addEventListener('input',event=>{
+ if(!moneyInputNames.includes(event.target.name))return;
+ if(event.target.name==='precio'||event.target.name==='enganche')updateSaldo();
+ updateTotal();
+});
+form.addEventListener('focusout',event=>{
+ if(!moneyInputNames.includes(event.target.name))return;
+ event.target.value=formatMoneyInput(event.target.value);
+ if(event.target.name==='pago1monto' && generatedMonths>1){
+  distributeRemainingPayments(generatedMonths,Math.round(Math.max(0,parseMoney(event.target.value))*100));
+ }
+ if(event.target.name==='enganche' && generatedMonths>0){
+  const first=Math.round(Math.max(0,parseMoney(get('pago1monto')))*100);
+  distributeRemainingPayments(generatedMonths,first);
+ }
+ updateSaldo();updateTotal();
+});
+form.addEventListener('reset',()=>setTimeout(()=>{generatedMonths=0;updateCurrencyLabels();updateSaldo();updateTotal()},0));
 updateCurrencyLabels();
+updateSaldo();
 updateTotal();
 function drawText(page,font,text,x,y,size,color=C.ink,maxWidth=500){
  if(text===undefined||text===null||String(text)==='')return;
@@ -347,215 +449,210 @@ function generatePrintFallback(){
  const w=window.open('','_blank');
  if(!w){document.getElementById('status').textContent='El navegador bloqueó la ventana de impresión. Permití las ventanas emergentes e intentá de nuevo.';return;}
  w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>HSM_Formulario_Asignacion</title><style>
- @page{size:A4;margin:14mm}*{box-sizing:border-box}body{font:11px Arial,sans-serif;color:#26312b;margin:0}header{background:#263b31;color:white;padding:16px 18px;border-bottom:4px solid #b49a62}h1{font:24px Georgia,serif;margin:20px 0 5px;color:#263b31}h2{font:14px Georgia,serif;background:#edf1e9;border-left:3px solid #b49a62;padding:7px;margin:14px 0 8px}p{color:#69746c}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 14px}.field{border-bottom:1px solid #d8ddd4;min-height:30px;padding:3px 0;overflow-wrap:anywhere}.field b{display:block;font-size:8px;text-transform:uppercase;color:#69746c;margin-bottom:3px}.money{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.money .field{background:#edf1e9;padding:8px;border:0}table{width:100%;border-collapse:collapse;margin-top:8px}th{background:#263b31;color:white;text-align:left}td,th{padding:7px;border:1px solid #d8ddd4}tr:nth-child(even){background:#edf1e9}.signatures{display:grid;grid-template-columns:1fr 1fr;gap:35px;margin-top:40px}.sig{border-top:1px solid #263b31;padding-top:8px;margin-top:28px}.note{font-size:9px;background:#f4f1e7;padding:9px;margin-top:12px}footer{font-size:9px;color:#69746c;margin-top:18px}@media print{button{display:none}}
- </style></head><body><header><b>HACIENDA SANTA MARÍA</b><div>FORMULARIO DE ASIGNACIÓN</div></header><h1>Solicitud de asignación</h1><p>Información del solicitante y de la propiedad</p><h2>01 · Datos de la propiedad</h2><div class="grid">${fieldRow('Fecha','fecha')}${fieldRow('Finca','finca')}${fieldRow('Folio','folio')}${fieldRow('Libro','libro')}${fieldRow('Propiedad No.','propiedad')}${fieldRow('Área del terreno','area')}</div><h2>02 · Datos personales</h2><div class="grid">${fieldRow('Nombre completo','nombre')}${fieldRow('Fecha de nacimiento','nacimiento')}${fieldRow('Estado civil','estadoCivil')}${fieldRow('Nacionalidad','nacionalidad')}${fieldRow('Dirección','direccion')}${fieldRow('Tipo de documento','tipoDocumento')}${fieldRow('Número de identificación','dpi')}${fieldRow('NIT','nit')}${fieldRow('Correo electrónico','correo')}${fieldRow('Teléfono celular','telefono')}${fieldRow('Ocupación','ocupacion')}${fieldRow('Empresa donde labora','empresa')}${fieldRow('Documentos a adjuntar','documentos')}${fieldRow('Copia del documento','copiaDpi')}</div><h2>03 · Resumen económico</h2><div class="money">${fieldRow(`Precio de venta (${currencySymbol()})`,'precio')}${fieldRow(`Enganche pactado (${currencySymbol()})`,'enganche')}${fieldRow(`Saldo a financiar (${currencySymbol()})`,'saldo')}</div><h2>04 · Plan de pagos</h2><table><thead><tr><th>Forma de pago</th><th>Monto</th><th>Fecha</th></tr></thead><tbody>${paymentsRows}<tr><th>TOTAL DE PAGOS</th><th>${escapeHTML(total)}</th><th></th></tr></tbody></table><div class="note">Reserva y arras: verificar las condiciones pactadas en el documento contractual. Gastos de cierre no incluidos en el precio de venta: gastos legales, timbres de acción y gastos de conexión.</div><h2>05 · Firmas y constancia</h2>${fieldRow('Fecha de entrega (confirmación)','entregaConfirmacion')}<div class="signatures"><div class="sig">Firma del cliente</div><div class="sig">Nombre y firma del representante legal<br>${escapeHTML(values.representante||'')}</div></div><footer>Hacienda Santa María · Revisar ambas páginas antes de imprimir o guardar como PDF.</footer><script>window.addEventListener('load',()=>setTimeout(()=>window.print(),300));<\/script>
+ @page{size:A4;margin:6mm}*{box-sizing:border-box}body{font:8px Arial,sans-serif;color:#26312b;margin:0;zoom:.82}header{background:#263b31;color:white;padding:16px 18px;border-bottom:4px solid #b49a62}h1{font:24px Georgia,serif;margin:20px 0 5px;color:#263b31}h2{font:14px Georgia,serif;background:#edf1e9;border-left:3px solid #b49a62;padding:7px;margin:14px 0 8px}p{color:#69746c}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 14px}.field{border-bottom:1px solid #d8ddd4;min-height:30px;padding:3px 0;overflow-wrap:anywhere}.field b{display:block;font-size:8px;text-transform:uppercase;color:#69746c;margin-bottom:3px}.money{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.money .field{background:#edf1e9;padding:8px;border:0}table{width:100%;border-collapse:collapse;margin-top:8px}th{background:#263b31;color:white;text-align:left}td,th{padding:7px;border:1px solid #d8ddd4}tr:nth-child(even){background:#edf1e9}.signatures{display:grid;grid-template-columns:1fr 1fr;gap:35px;margin-top:40px}.sig{border-top:1px solid #263b31;padding-top:8px;margin-top:28px}.note{font-size:9px;background:#f4f1e7;padding:9px;margin-top:12px}footer{font-size:9px;color:#69746c;margin-top:18px}@media print{button{display:none}}
+ </style></head><body><header><b>HACIENDA SANTA MARÍA</b><div>FORMULARIO DE ASIGNACIÓN</div></header><h1>Solicitud de asignación</h1><p>Información del solicitante y de la propiedad</p><h2>01 · Datos de la propiedad</h2><div class="grid">${fieldRow('Fecha','fecha')}${fieldRow('Finca','finca')}${fieldRow('Folio','folio')}${fieldRow('Libro','libro')}${fieldRow('Propiedad No.','propiedad')}${fieldRow('Área del terreno','area')}</div><h2>02 · Datos personales</h2><div class="grid">${fieldRow('Nombre completo','nombre')}${fieldRow('Fecha de nacimiento','nacimiento')}${fieldRow('Estado civil','estadoCivil')}${fieldRow('Nacionalidad','nacionalidad')}${fieldRow('Dirección','direccion')}${fieldRow('Tipo de documento','tipoDocumento')}${fieldRow('Número de identificación','dpi')}${fieldRow('NIT','nit')}${fieldRow('Correo electrónico','correo')}${fieldRow('Teléfono celular','telefono')}${fieldRow('Ocupación','ocupacion')}${fieldRow('Empresa donde labora','empresa')}${fieldRow('Documentos a adjuntar','documentos')}${fieldRow('Copia del documento','copiaDpi')}</div><h2>03 · Resumen económico</h2><div class="money">${fieldRow(`Precio de venta (${currencySymbol()})`,'precio')}${fieldRow(`Enganche pactado (${currencySymbol()})`,'enganche')}${fieldRow(`Saldo a financiar (${currencySymbol()})`,'saldo')}</div><h2>04 · Plan de pagos</h2><table><thead><tr><th>Forma de pago</th><th>Monto</th><th>Fecha</th></tr></thead><tbody>${paymentsRows}<tr><th>TOTAL DE PAGOS</th><th>${escapeHTML(total)}</th><th></th></tr></tbody></table><div class="note">Reserva y arras: verificar las condiciones pactadas en el documento contractual. Gastos de cierre no incluidos en el precio de venta: gastos legales, timbres de acción y gastos de conexión.</div><h2>05 · Firmas y constancia</h2>${fieldRow('Fecha de entrega (confirmación)','entregaConfirmacion')}<div class="signatures"><div class="sig">Firma del cliente</div><div class="sig">Nombre y firma del representante legal<br>${escapeHTML(values.representante||'')}</div></div><footer>Hacienda Santa María · Documento de una página para revisión e impresión.</footer><script>window.addEventListener('load',()=>setTimeout(()=>window.print(),300));<\/script>
 </body></html>`);
  w.document.close();
- document.getElementById('status').textContent='Se abrió una versión imprimible. En el diálogo elegí “Guardar como PDF”.';
+ document.getElementById('status').textContent='Se abrió una versión imprimible de una página. En el diálogo elegí “Guardar como PDF”.';
 }
 async function generatePDF(){
  const status=document.getElementById('status');
  try{
-  if(!window.PDFLib){generatePrintFallback();return;}
+  if(!window.PDFLib){generatePrintFallback();if(window.HSMHistory)await window.HSMHistory.saveCurrent();return;}
   const enganche=parseMoney(get('enganche'));
   if(!get('enganche')) throw new Error('Ingresá el enganche pactado antes de generar el PDF.');
   if(Math.round(sumPayments()*100)!==Math.round(enganche*100)){
    updateTotal();
    throw new Error('No se puede generar el PDF: la suma de los pagos debe coincidir exactamente con el enganche pactado.');
   }
-  status.textContent='Generando documento…';
-  const {PDFDocument,StandardFonts,rgb}=PDFLib;
+  status.textContent='Generando documento de una página…';
+  const {PDFDocument,StandardFonts}=PDFLib;
   const pdf=await PDFDocument.create();
   const fonts={reg:await pdf.embedFont(StandardFonts.Helvetica),bold:await pdf.embedFont(StandardFonts.HelveticaBold),serif:await pdf.embedFont(StandardFonts.TimesRoman),serifBold:await pdf.embedFont(StandardFonts.TimesRomanBold)};
-  let logoBytes=null;try{logoBytes=await (await fetch('./logo-hacienda-santa-maria-white.png')).arrayBuffer()}catch{}
-  let logo=null;if(logoBytes)logo=await pdf.embedPng(logoBytes);
-  const p1=pdf.addPage([612,792]);
-  p1.drawRectangle({x:0,y:0,width:612,height:792,color:C.paper});
-  p1.drawRectangle({x:0,y:748,width:612,height:44,color:C.forest});
-  p1.drawRectangle({x:0,y:744,width:612,height:4,color:C.gold});
-  if(logo)p1.drawImage(logo,{x:40,y:757,width:148,height:34});
-  else drawText(p1,fonts.serifBold,'HACIENDA SANTA MARÍA',40,769,14,C.white,260);
-  drawText(p1,fonts.reg,'FORMULARIO DE ASIGNACIÓN',390,771,7,C.sage,180);
-  drawText(p1,fonts.serif,'Solicitud de asignación',40,710,22,C.forest,390);
-  drawText(p1,fonts.reg,'INFORMACIÓN DEL SOLICITANTE Y DE LA PROPIEDAD',40,694,7,C.muted,440);
-  // top meta pill
-  p1.drawRectangle({x:445,y:696,width:127,height:28,radius:7,color:C.pale,borderColor:C.line,borderWidth:.5});
-  drawText(p1,fonts.bold,'FECHA',455,713,6,C.muted,105);
-  drawText(p1,fonts.reg,dateGT(get('fecha')),455,702,8,C.ink,105);
-  let y=662;
-  y=section(p1,fonts,'01  ·  DATOS DE LA PROPIEDAD',40,y,532);
-  field(p1,fonts,'Finca',get('finca'),40,y-4,115);
-  field(p1,fonts,'Folio',get('folio'),170,y-4,115);
-  field(p1,fonts,'Libro',get('libro'),300,y-4,100);
-  field(p1,fonts,'Propiedad No.',get('propiedad'),415,y-4,157);
-  y-=49;
-  field(p1,fonts,'Área del terreno',get('area'),40,y-4,255);
-  y-=45;
-  y=section(p1,fonts,'02  ·  DATOS PERSONALES',40,y,532);
-  field(p1,fonts,'Nombre completo',get('nombre'),40,y-4,532);
-  y-=48;
-  field(p1,fonts,'Fecha de nacimiento',dateGT(get('nacimiento')),40,y-4,155);
-  field(p1,fonts,'Estado civil',get('estadoCivil'),215,y-4,155);
-  field(p1,fonts,'Nacionalidad',get('nacionalidad'),390,y-4,182);
-  y-=48;
-  field(p1,fonts,'Dirección para recibir correspondencia en Guatemala',get('direccion'),40,y-4,532);
-  y-=48;
-  field(p1,fonts,'Tipo de documento',get('tipoDocumento'),40,y-4,155);
-  field(p1,fonts,'Número de identificación',get('dpi'),215,y-4,155);
-  field(p1,fonts,'NIT (si tiene)',get('nit'),390,y-4,182);
-  y-=48;
-  field(p1,fonts,'Correo electrónico',get('correo'),40,y-4,255);
-  field(p1,fonts,'Teléfono celular',get('telefono'),320,y-4,252);
-  y-=48;
-  field(p1,fonts,'Ocupación del solicitante',get('ocupacion'),40,y-4,255);
-  field(p1,fonts,'Empresa donde labora',get('empresa'),320,y-4,252);
-  y-=48;
-  field(p1,fonts,'Documentos a adjuntar',get('documentos'),40,y-4,255);
-  field(p1,fonts,'Copia del documento de identificación',get('copiaDpi'),320,y-4,252);
-  y-=48;
-  y=section(p1,fonts,'03  ·  RESUMEN ECONÓMICO',40,y-2,532);
-  const boxY=y-48;
-  drawLabeledBox(p1,fonts,`Precio de venta (${currencySymbol()})`,get('precio')?money(parseMoney(get('precio'))):'',40,boxY,164,39);
-  drawLabeledBox(p1,fonts,`Enganche pactado (${currencySymbol()})`,get('enganche')?money(parseMoney(get('enganche'))):'',218,boxY,164,39);
-  drawLabeledBox(p1,fonts,`Saldo a financiar (${currencySymbol()})`,get('saldo')?money(parseMoney(get('saldo'))):'',396,boxY,176,39);
-  drawText(p1,fonts.reg,`Los importes se presentan en ${currencyCode()==='USD'?'dólares estadounidenses (US$)':'quetzales (Q)'}. Verificá que los montos coincidan con lo pactado.`,40,boxY-18,7,C.muted,532);
-  drawText(p1,fonts.reg,'Hacienda Santa María  ·  Documento comercial para revisión e impresión',40,22,7,C.muted,420);
-  const p2=pdf.addPage([612,792]);p2.drawRectangle({x:0,y:0,width:612,height:792,color:C.paper});
-  drawHeader(p2,fonts,2,'Plan de pagos y firmas');
-  drawText(p2,fonts.reg,'PROPIEDAD',40,696,6.5,C.muted,100);
-  drawText(p2,fonts.bold,get('propiedad')||'—',40,682,10,C.forest,200);
-  drawText(p2,fonts.reg,'SOLICITANTE',240,696,6.5,C.muted,100);
-  drawText(p2,fonts.bold,get('nombre')||'—',240,682,10,C.forest,325);
-  // payment table
-  const tx=40, top=650, tw=532, labelW=250, amountW=145, dateW=137, rowH=26;
-  p2.drawRectangle({x:tx,y:top-26,width:tw,height:26,color:C.forest});
-  drawText(p2,fonts.bold,'FORMA DE PAGO',tx+12,top-16,7,C.white,labelW-20);
-  drawText(p2,fonts.bold,'MONTO',tx+labelW+10,top-16,7,C.white,amountW-20);
-  drawText(p2,fonts.bold,'FECHA',tx+labelW+amountW+10,top-16,7,C.white,dateW-20);
+  let logo=null;try{const b=await (await fetch('./logo-hacienda-santa-maria-white.png')).arrayBuffer();logo=await pdf.embedPng(b)}catch{}
+  const p=pdf.addPage([595.28,841.89]);
+  p.drawRectangle({x:0,y:0,width:595.28,height:841.89,color:C.paper});
+  p.drawRectangle({x:0,y:797,width:595.28,height:44.89,color:C.forest});
+  p.drawRectangle({x:0,y:793,width:595.28,height:4,color:C.gold});
+  if(logo)p.drawImage(logo,{x:28,y:805,width:132,height:30});
+  else drawText(p,fonts.serifBold,'HACIENDA SANTA MARÍA',28,816,12,C.white,250);
+  drawText(p,fonts.reg,'FORMULARIO DE ASIGNACIÓN',380,817,7,C.sage,185);
+  drawText(p,fonts.serif,'Solicitud de asignación',28,773,17,C.forest,340);
+  drawText(p,fonts.reg,'INFORMACIÓN DEL SOLICITANTE Y DE LA PROPIEDAD',28,760,6.5,C.muted,380);
+  p.drawRectangle({x:453,y:754,width:114,height:25,radius:5,color:C.pale,borderColor:C.line,borderWidth:.5});
+  drawText(p,fonts.bold,'FECHA',461,768,5.5,C.muted,95);
+  drawText(p,fonts.reg,dateGT(get('fecha')),461,758,7,C.ink,95);
+  let y=744;
+  const sec=(title)=>{p.drawRectangle({x:28,y:y-4,width:539,height:16,color:C.pale});p.drawRectangle({x:28,y:y-4,width:3,height:16,color:C.gold});drawText(p,fonts.bold,title,37,y+1,7,C.forest,520);y-=20};
+  const row=(items)=>{
+    const gap=10, totalW=539, w=(totalW-gap*(items.length-1))/items.length;
+    items.forEach((it,i)=>{const x=28+i*(w+gap);drawText(p,fonts.bold,it[0].toUpperCase(),x,y,5.2,C.muted,w);drawText(p,fonts.reg,it[1]||'—',x,y-9,6.8,C.ink,w);p.drawLine({start:{x,y:y-12},end:{x:x+w,y:y-12},thickness:.45,color:C.line})});
+    y-=17;
+  };
+  sec('01 · DATOS DE LA PROPIEDAD');
+  row([['Finca',get('finca')],  ['Folio',get('folio')],['Libro',get('libro')],['Propiedad No.',get('propiedad')]]);
+  row([['Área del terreno',get('area')]]);
+   y -=12;
+  sec('02 · DATOS PERSONALES');
+  row([['Nombre completo',get('nombre')]]);
+  row([['Fecha de nacimiento',dateGT(get('nacimiento'))],['Estado civil',get('estadoCivil')],['Nacionalidad',get('nacionalidad')]]);
+  row([['Dirección para correspondencia',get('direccion')]]);
+  row([['Tipo de documento',get('tipoDocumento')],['Número de identificación',get('dpi')],['NIT',get('nit')]]);
+  row([['Correo electrónico',get('correo')],['Teléfono celular',get('telefono')]]);
+  row([['Ocupación',get('ocupacion')],['Empresa donde labora',get('empresa')]]);
+  row([['Documentos a adjuntar',get('documentos')],['Copia del documento',get('copiaDpi')]]);
+   y -=12;
+  sec('03 · RESUMEN ECONÓMICO');
+  const bx=28,bw=173,by=y-27;
+  [['PRECIO DE VENTA',get('precio')?money(parseMoney(get('precio'))):'—'],['ENGANCHE PACTADO',get('enganche')?money(parseMoney(get('enganche'))):'—'],['SALDO A FINANCIAR',get('saldo')?money(parseMoney(get('saldo'))):'—']].forEach((it,i)=>{const x=bx+i*183;p.drawRectangle({x,y:by,width:bw,height:25,radius:4,color:C.white,borderColor:C.line,borderWidth:.5});drawText(p,fonts.bold,it[0],x+7,by+15,5.2,C.muted,bw-14);drawText(p,fonts.reg,it[1],x+7,by+5,7,C.forest,bw-14)});
+  y=by-11;
+  drawText(p,fonts.reg,`Importes en ${currencyCode()==='USD'?'dólares estadounidenses (US$)':'quetzales (Q)'}.`,28,y,5.5,C.muted,539);y-=12;
+   y -=10;
+  sec('04 · PLAN DE PAGOS');
+  const tx=28,tw=539, labelW=250, amountW=150, dateW=139, rowH=11.5, top=y;
+  p.drawRectangle({x:tx,y:top-12,width:tw,height:12,color:C.forest});
+  drawText(p,fonts.bold,'FORMA DE PAGO',tx+7,top-8.5,5.4,C.white,labelW-12);
+  drawText(p,fonts.bold,'MONTO',tx+labelW+5,top-8.5,5.4,C.white,amountW-10);
+  drawText(p,fonts.bold,'FECHA',tx+labelW+amountW+5,top-8.5,5.4,C.white,dateW-10);
   for(let i=1;i<=12;i++){
-    const yy=top-26-i*rowH;
-    p2.drawRectangle({x:tx,y:yy,width:tw,height:rowH,color:i%2?C.white:C.pale,borderColor:C.line,borderWidth:.45});
-    drawText(p2,fonts.reg,i===1?'Pago 1 · Reserva/arras':`Pago ${i}`,tx+12,yy+9,8,C.ink,labelW-20);
+    const yy=top-12-i*rowH;
+    p.drawRectangle({x:tx,y:yy,width:tw,height:rowH,color:i%2?C.white:C.pale,borderColor:C.line,borderWidth:.25});
+    drawText(p,fonts.reg,i===1?'Pago 1 · Reserva/arras':`Pago ${i}`,tx+7,yy+3.3,5.5,C.ink,labelW-12);
     const val=get(`pago${i}monto`);
-    if(val)drawText(p2,fonts.reg,money(parseMoney(val)),tx+labelW+10,yy+9,8,C.ink,amountW-20);
-    drawText(p2,fonts.reg,dateGT(get(`pago${i}fecha`)),tx+labelW+amountW+10,yy+9,8,C.ink,dateW-20);
+    if(val)drawText(p,fonts.reg,money(parseMoney(val)),tx+labelW+5,yy+3.3,5.5,C.ink,amountW-10);
+    drawText(p,fonts.reg,dateGT(get(`pago${i}fecha`)),tx+labelW+amountW+5,yy+3.3,5.5,C.ink,dateW-10);
   }
-  const totalY=top-26-12*rowH-30;
-  p2.drawRectangle({x:tx,y:totalY,width:tw,height:25,radius:5,color:C.sage,borderColor:C.line,borderWidth:.5});
-  drawText(p2,fonts.bold,'TOTAL DE PAGOS',tx+12,totalY+9,8,C.forest,200);
-  drawText(p2,fonts.bold,money(sumPayments()),tx+labelW+10,totalY+9,9,C.forest,amountW-20);
-  // legal note
-  const legalY=totalY-21;
-  p2.drawRectangle({x:tx,y:legalY-43,width:tw,height:43,radius:5,color:C.legal,borderColor:PDFColor('#e2d8bf'),borderWidth:.6});
-  const legal='Nota: El monto otorgado como reserva y arras no es reembolsable, conforme a la cláusula de indemnización del artículo 1442 del Código Civil, en concepto de daños y perjuicios ocasionados.';
-  const lines=wrapText(fonts.reg,legal,7.1,tw-22);
-  lines.slice(0,4).forEach((line,i)=>drawText(p2,fonts.reg,line,tx+11,legalY-14-i*10,7.1,C.ink,tw-22));
-  const expense='Gastos de cierre no incluidos en el precio de venta: gastos legales, timbres de acción y gastos de conexión.';
-  drawText(p2,fonts.bold,'GASTOS ADICIONALES',tx,legalY-59,6.5,C.muted,200);
-  wrapText(fonts.reg,expense,7.2,tw).slice(0,2).forEach((line,i)=>drawText(p2,fonts.reg,line,tx,legalY-71-i*10,7.2,C.ink,tw));
-  const signY=legalY-124;
-  drawText(p2,fonts.bold,'FECHA DE ENTREGA',tx,signY+28,6.5,C.muted,150);
-  drawText(p2,fonts.reg,dateGT(get('entregaConfirmacion')),tx,signY+13,9,C.ink,170);
-  p2.drawLine({start:{x:40,y:signY-23},end:{x:270,y:signY-23},thickness:.8,color:C.forest});
-  drawText(p2,fonts.reg,'Firma del cliente',40,signY-36,8,C.muted,230);
-  p2.drawLine({start:{x:325,y:signY-23},end:{x:572,y:signY-23},thickness:.8,color:C.forest});
-  drawText(p2,fonts.reg,'Nombre y firma del representante legal',325,signY-36,8,C.muted,247);
-  if(get('representante'))drawText(p2,fonts.reg,get('representante'),325,signY-50,8,C.ink,247);
-  drawText(p2,fonts.reg,'Las firmas se completan físicamente después de imprimir el documento.',40,48,7,C.muted,500);
+  const totalY=top-12-12*rowH-13;
+  p.drawRectangle({x:tx,y:totalY,width:tw,height:12,radius:3,color:C.sage,borderColor:C.line,borderWidth:.4});
+  drawText(p,fonts.bold,'TOTAL DE PAGOS',tx+7,totalY+3.5,5.8,C.forest,200);
+  drawText(p,fonts.bold,money(sumPayments()),tx+labelW+5,totalY+3.5,6,C.forest,amountW-10);
+  y=totalY-9;
+  const legal='Reserva y arras: el monto no es reembolsable conforme a las condiciones contractuales aplicables. Gastos de cierre no incluidos en el precio: gastos legales, timbres de acción y gastos de conexión.';
+  p.drawRectangle({x:28,y:y-25,width:539,height:25,radius:3,color:C.legal,borderColor:PDFColor('#e2d8bf'),borderWidth:.4});
+  wrapText(fonts.reg,legal,5.3,523).slice(0,3).forEach((line,i)=>drawText(p,fonts.reg,line,36,y-9-i*6.5,5.3,C.ink,523));
+  y-=39;
+  drawText(p,fonts.bold,'FECHA DE ENTREGA',28,y,5.2,C.muted,130);
+   y -=30;
+  drawText(p,fonts.reg,dateGT(get('entregaConfirmacion'))||'—',28,y-9,6.2,C.ink,130);
+  p.drawLine({start:{x:180,y:y-5},end:{x:350,y:y-5},thickness:.6,color:C.forest});
+  drawText(p,fonts.reg,'Firma del cliente',180,y-14,5.5,C.muted,170);
+  p.drawLine({start:{x:375,y:y-5},end:{x:567,y:y-5},thickness:.6,color:C.forest});
+  drawText(p,fonts.reg,'Firma del representante legal',375,y-14,5.5,C.muted,192);
+  if(get('representante'))drawText(p,fonts.reg,get('representante'),375,y-22,5.5,C.ink,192);
+  p.drawLine({start:{x:28,y:22},end:{x:567,y:22},thickness:.5,color:C.line});
+  drawText(p,fonts.reg,'Hacienda Santa María · Documento comercial para revisión e impresión',28,11,5.2,C.muted,500);
   const bytes=await pdf.save();
   const blob=new Blob([bytes],{type:'application/pdf'}),url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download='HSM_Formulario_Asignacion.pdf';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
-  status.textContent='PDF descargado. Revisá ambas páginas antes de imprimir.';
+  if(window.HSMHistory)await window.HSMHistory.saveCurrent();
+  status.textContent='PDF de una página descargado. Revisá la vista previa antes de imprimir.';
  }catch(err){console.error(err);status.textContent=err.message||'No se pudo generar el PDF.'}
 }
 form.addEventListener('submit',e=>{e.preventDefault();generatePDF()});
 updateCurrencyLabels();
+updateSaldo();
 updateTotal();
 </script>
 <script>
-/* Gestión de sesión local. No es autenticación segura para producción. */
+/* Autenticación, usuarios e historial mediante la API del Worker. */
 (function(){
- const USERS_KEY='hsm_local_users_v1';
- const SESSION_KEY='hsm_local_session_v1';
  const $=id=>document.getElementById(id);
- const defaults=[
-  {username:'admin',password:'GrupoA,$123#',role:'admin',displayName:'Administrador'},
-  {username:'estandar',password:'estandar123',role:'user',displayName:'Usuario estándar'}
- ];
- function readUsers(){
-  try{
-   const raw=localStorage.getItem(USERS_KEY);
-   if(raw){const parsed=JSON.parse(raw);if(Array.isArray(parsed)&&parsed.length)return parsed;}
-  }catch(e){}
-  localStorage.setItem(USERS_KEY,JSON.stringify(defaults));
-  return defaults.slice();
+ const API='/api';
+ let activeUser=null;
+ let editingParentId=null;
+ let historyCache=[];
+ const form=document.getElementById('mainForm')||document.querySelector('form[data-main-form]')||document.querySelector('#appShell form');
+ async function api(path,options={}){
+  const response=await fetch(API+path,{...options,credentials:'same-origin',headers:{'content-type':'application/json',...(options.headers||{})}});
+  if(response.status===204)return null;
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok){const error=new Error(data.error||'No se pudo completar la solicitud.');error.status=response.status;throw error;}
+  return data;
  }
- function saveUsers(users){localStorage.setItem(USERS_KEY,JSON.stringify(users));}
- function getSession(){try{return JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null')}catch(e){return null}}
  function setMessage(el,text,type){el.textContent=text;el.className='login-message show '+type}
  function show(which){
   $('loginScreen').classList.toggle('hidden',which!=='login');
   $('adminScreen').classList.toggle('hidden',which!=='admin');
   $('appShell').classList.toggle('hidden',which!=='form');
+  $('historyScreen').classList.toggle('hidden',which!=='history');
  }
  function renderApp(){
-  const s=getSession();
-  if(!s){show('login');return}
-  const u=readUsers().find(x=>x.username.toLowerCase()===s.username.toLowerCase());
-  if(!u){sessionStorage.removeItem(SESSION_KEY);show('login');return}
-  s.role=u.role;sessionStorage.setItem(SESSION_KEY,JSON.stringify(s));
-  $('currentUserLabel').textContent=(u.displayName||u.username)+' · '+(u.role==='admin'?'Administrador':'Usuario estándar');
-  $('openAdmin').classList.toggle('hidden',u.role!=='admin');
+  if(!activeUser){show('login');return;}
+  $('currentUserLabel').textContent=(activeUser.displayName||activeUser.username)+' · '+(activeUser.role==='admin'?'Administrador':'Usuario estándar');
+  $('openAdmin').classList.toggle('hidden',activeUser.role!=='admin');
   show('form');
  }
- function renderUsers(){
-  const list=$('adminUsers');list.replaceChildren();
-  readUsers().forEach(u=>{
-   const row=document.createElement('div');row.className='admin-user';
-   const info=document.createElement('div');
-   const strong=document.createElement('strong');strong.textContent=u.username;
-   const detail=document.createElement('small');detail.textContent=(u.displayName||u.username)+' · '+(u.role==='admin'?'Administrador':'Usuario estándar');
-   info.append(strong,detail);
-   const actions=document.createElement('div');actions.style.cssText='display:flex;gap:8px;align-items:center;flex-wrap:wrap';
-   const select=document.createElement('select');select.className='role-chip';select.setAttribute('aria-label','Rol de '+u.username);
-   [['admin','Administrador'],['user','Usuario estándar']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;o.selected=u.role===v;select.append(o)});
-   select.addEventListener('change',()=>{
-    const users=readUsers(),target=users.find(x=>x.username.toLowerCase()===u.username.toLowerCase());
-    if(target.role==='admin'&&select.value!=='admin'&&users.filter(x=>x.role==='admin').length===1){setMessage($('adminMessage'),'Debe quedar al menos un administrador.','error');select.value='admin';return}
-    target.role=select.value;saveUsers(users);renderUsers();renderApp();setMessage($('adminMessage'),'Rol actualizado.','ok');
-   });
-   const del=document.createElement('button');del.type='button';del.className='danger-btn';del.textContent='Eliminar';
-   del.addEventListener('click',()=>{
-    const s=getSession();if(s&&s.username.toLowerCase()===u.username.toLowerCase()){setMessage($('adminMessage'),'No podés eliminar la cuenta que está usando esta sesión.','error');return}
-    const users=readUsers(),target=users.find(x=>x.username.toLowerCase()===u.username.toLowerCase());
-    if(target.role==='admin'&&users.filter(x=>x.role==='admin').length===1){setMessage($('adminMessage'),'Debe quedar al menos un administrador.','error');return}
-    if(!confirm('¿Eliminar el usuario "'+target.username+'"?'))return;
-    saveUsers(users.filter(x=>x.username.toLowerCase()!==u.username.toLowerCase()));renderUsers();setMessage($('adminMessage'),'Usuario eliminado.','ok');
-   });
-   actions.append(select,del);row.append(info,actions);list.append(row);
-  });
+ async function restoreSession(){
+  try{const data=await api('/auth/me');activeUser=data.user;renderApp();}
+  catch{activeUser=null;show('login');}
  }
- $('loginForm').addEventListener('submit',e=>{
+ async function renderUsers(){
+  const list=$('adminUsers');list.replaceChildren();
+  try{
+   const data=await api('/users');
+   data.users.forEach(u=>{
+    const row=document.createElement('div');row.className='admin-user';
+    const info=document.createElement('div');
+    const strong=document.createElement('strong');strong.textContent=u.username;
+    const detail=document.createElement('small');detail.textContent=(u.display_name||u.username)+' · '+(u.role==='admin'?'Administrador':'Usuario estándar');
+    info.append(strong,detail);
+    const actions=document.createElement('div');actions.style.cssText='display:flex;gap:8px;align-items:center;flex-wrap:wrap';
+    const select=document.createElement('select');select.className='role-chip';select.setAttribute('aria-label','Rol de '+u.username);
+    [['admin','Administrador'],['user','Usuario estándar']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;o.selected=u.role===v;select.append(o)});
+    select.addEventListener('change',async()=>{try{await api('/users/'+u.id,{method:'PATCH',body:JSON.stringify({role:select.value})});await renderUsers();setMessage($('adminMessage'),'Rol actualizado.','ok');}catch(e){select.value=u.role;setMessage($('adminMessage'),e.message,'error');}});
+    const del=document.createElement('button');del.type='button';del.className='danger-btn';del.textContent='Desactivar';
+    del.addEventListener('click',async()=>{if(!confirm('¿Desactivar el usuario "'+u.username+'"?'))return;try{await api('/users/'+u.id,{method:'DELETE'});await renderUsers();setMessage($('adminMessage'),'Usuario desactivado.','ok');}catch(e){setMessage($('adminMessage'),e.message,'error');}});
+    actions.append(select,del);row.append(info,actions);list.append(row);
+   });
+  }catch(e){setMessage($('adminMessage'),e.message,'error');}
+ }
+ $('loginForm').addEventListener('submit',async e=>{
   e.preventDefault();const username=$('loginUsername').value.trim(),password=$('loginPassword').value;
-  const user=readUsers().find(u=>u.username.toLowerCase()===username.toLowerCase()&&u.password===password);
-  if(!user){setMessage($('loginMessage'),'Usuario o contraseña incorrectos.','error');return}
-  sessionStorage.setItem(SESSION_KEY,JSON.stringify({username:user.username,role:user.role,loggedAt:Date.now()}));
-  $('loginPassword').value='';renderApp();
+  try{const data=await api('/auth/login',{method:'POST',body:JSON.stringify({username,password})});activeUser=data.user;$('loginPassword').value='';setMessage($('loginMessage'),'','ok');renderApp();}
+  catch(err){setMessage($('loginMessage'),err.message,'error');}
  });
- $('openAdmin').addEventListener('click',()=>{const s=getSession();if(!s||s.role!=='admin'){renderApp();return}renderUsers();show('admin')});
+ $('openAdmin').addEventListener('click',async()=>{if(!activeUser||activeUser.role!=='admin'){renderApp();return;}await renderUsers();show('admin');});
  $('adminBackForm').addEventListener('click',renderApp);
  $('adminLogoutTop').addEventListener('click',logout);
  $('logoutButton').addEventListener('click',logout);
- function logout(){sessionStorage.removeItem(SESSION_KEY);show('login');$('loginPassword').value=''}
- $('createUserForm').addEventListener('submit',e=>{
+ async function logout(){try{await api('/auth/logout',{method:'POST'});}catch{}activeUser=null;show('login');$('loginPassword').value='';}
+ $('createUserForm').addEventListener('submit',async e=>{
   e.preventDefault();const username=$('newUsername').value.trim(),password=$('newPassword').value,displayName=$('newDisplayName').value.trim(),role=$('newRole').value;
-  if(!/^[a-zA-Z0-9._-]{3,40}$/.test(username)){setMessage($('adminMessage'),'Usá 3 a 40 caracteres: letras, números, punto, guion o guion bajo.','error');return}
-  if(password.length<6){setMessage($('adminMessage'),'La contraseña debe tener al menos 6 caracteres.','error');return}
-  const users=readUsers();if(users.some(u=>u.username.toLowerCase()===username.toLowerCase())){setMessage($('adminMessage'),'Ese usuario ya existe. Elegí otro nombre.','error');return}
-  users.push({username,password,role,displayName:displayName||username});saveUsers(users);$('createUserForm').reset();renderUsers();setMessage($('adminMessage'),'Usuario "'+username+'" creado correctamente.','ok');
+  if(!/^[a-zA-Z0-9._-]{3,40}$/.test(username)){setMessage($('adminMessage'),'Usá 3 a 40 caracteres: letras, números, punto, guion o guion bajo.','error');return;}
+  if(password.length<12){setMessage($('adminMessage'),'La contraseña debe tener al menos 12 caracteres.','error');return;}
+  try{await api('/users',{method:'POST',body:JSON.stringify({username,password,displayName:displayName||username,role})});$('createUserForm').reset();await renderUsers();setMessage($('adminMessage'),'Usuario creado correctamente.','ok');}
+  catch(err){setMessage($('adminMessage'),err.message,'error');}
  });
- // Ensure only authenticated users see the existing form. The original form logic remains unchanged.
- show('login');
+ function collectValues(){return Array.from(form.elements).filter(el=>el.name).reduce((o,el)=>{o[el.name]=el.value||'';return o;},{});}
+ async function saveCurrentHistory(){
+  if(!activeUser)return;
+  try{await api('/records',{method:'POST',body:JSON.stringify({parent_id:editingParentId,form_data:collectValues()})});editingParentId=null;}
+  catch(e){$('status').textContent='El PDF se generó, pero no se pudo guardar en el historial: '+e.message;}
+ }
+ window.HSMHistory={saveCurrent:saveCurrentHistory};
+ async function renderHistory(){
+  if(!activeUser){renderApp();return;}
+  const list=$('historyList');list.replaceChildren();
+  try{
+   const data=await api('/records');historyCache=(data.records||[]).map(r=>({id:r.id,parentId:r.parent_id,createdAt:r.created_at,createdBy:r.created_by,createdByName:r.created_by,values:r.form_data||{}}));
+   $('historyEmpty').classList.toggle('hidden',historyCache.length>0);
+   historyCache.forEach(r=>{
+    const row=document.createElement('div');row.className='admin-user';const info=document.createElement('div');
+    const title=document.createElement('strong');title.textContent=(r.values.nombre||'Formulario sin nombre')+' · '+(r.values.propiedad?'Propiedad '+r.values.propiedad:'Sin número de propiedad');
+    const meta=document.createElement('div');meta.className='history-meta';meta.textContent='Creado por: '+r.createdByName+' · '+new Date(r.createdAt.replace(' ','T')+'Z').toLocaleString('es-GT')+(r.parentId?' · Versión corregida':'');
+    const detail=document.createElement('div');detail.className='history-meta';detail.textContent='Fecha del formulario: '+(r.values.fecha||'Sin fecha')+' · Moneda: '+(r.values.currency==='USD'?'US$':'Q');info.append(title,meta,detail);
+    const actions=document.createElement('div');actions.className='history-actions';
+    const edit=document.createElement('button');edit.type='button';edit.className='primary-btn';edit.textContent='Editar';
+    edit.addEventListener('click',()=>{Object.entries(r.values||{}).forEach(([name,value])=>{const el=form.elements.namedItem(name);if(el&&'value'in el)el.value=value;});editingParentId=r.id;updateCurrencyLabels();updateSaldo();updateTotal();show('form');$('status').textContent='Formulario cargado desde el historial. Al generar el PDF se guardará una nueva versión.';window.scrollTo({top:0,behavior:'smooth'});});
+    const remove=document.createElement('button');remove.type='button';remove.className='danger-btn';remove.textContent='Eliminar registro';
+    remove.addEventListener('click',async()=>{if(!confirm('¿Eliminar este registro del historial? Esta acción no se puede deshacer.'))return;try{await api('/records/'+r.id,{method:'DELETE'});await renderHistory();}catch(e){alert(e.message);}});
+    actions.append(edit,remove);row.append(info,actions);list.append(row);
+   });
+  }catch(e){$('historyEmpty').classList.remove('hidden');$('historyEmpty').textContent=e.message;}
+ }
+ $('openHistory').addEventListener('click',async()=>{if(!activeUser){show('login');return;}await renderHistory();show('history');});
+ $('historyBack').addEventListener('click',renderApp);
+ restoreSession();
 })();
 
 </script>

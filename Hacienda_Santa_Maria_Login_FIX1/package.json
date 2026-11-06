@@ -1,0 +1,19 @@
+{
+  "name": "hacienda-santa-maria-forms",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:init:local": "wrangler d1 execute hsm-database --local --file=database/schema.sql",
+    "db:init:remote": "wrangler d1 execute hsm-database --remote --file=database/schema.sql",
+    "admin:prepare": "node scripts/create-admin.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
