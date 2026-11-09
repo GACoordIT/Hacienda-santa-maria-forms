@@ -185,7 +185,15 @@ footer{max-width:1080px;margin:0 auto;padding:0 16px 28px;color:var(--muted);fon
     <label>Folio<input name="folio"></label>
     <label>Libro<input name="libro"></label>
     <label>Propiedad No.<input name="propiedad"></label>
-    <label>Área del terreno<input name="area"></label>
+    <label>Área del terreno
+     <div class="inline-fields">
+      <input name="area" inputmode="decimal" placeholder="Ej. 250">
+      <select name="areaUnidad" aria-label="Unidad del área del terreno">
+       <option value="m²" selected>m²</option>
+       <option value="v²">v²</option>
+      </select>
+     </div>
+    </label>
    </div></div>
   </section>
   <section class="card">
@@ -253,6 +261,9 @@ footer{max-width:1080px;margin:0 auto;padding:0 16px 28px;color:var(--muted);fon
        <option value="12" selected>Mes 12</option>
       </select>
      </label>
+     <label for="paymentStartDate">Fecha de inicio de pagos
+      <input id="paymentStartDate" name="paymentStartDate" type="date" required>
+     </label>
      <button id="generatePayments" class="primary-btn" type="button">Generar pagos</button>
     </div>
     <div id="paymentGenerationMessage" class="subnote" aria-live="polite"></div>
@@ -296,6 +307,19 @@ const parseMoney=value=>{let cleaned=String(value??'').replace(/Q/gi,'').replace
 const formatMoneyInput=value=>{const raw=String(value??'').trim();if(!raw)return '';const n=parseMoney(raw);return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})};
 const moneyInputNames=['precio','enganche','saldo',...Array.from({length:12},(_,i)=>`pago${i+1}monto`)];
 const dateGT=s=>{if(!s)return '';const [y,m,d]=s.split('-');return `${d}/${m}/${y}`};
+function localDateISO(date=new Date()){
+ const year=date.getFullYear(),month=String(date.getMonth()+1).padStart(2,'0'),day=String(date.getDate()).padStart(2,'0');
+ return `${year}-${month}-${day}`;
+}
+function monthlyPaymentDate(startISO,monthOffset){
+ const [year,month,day]=startISO.split('-').map(Number);
+ const targetMonth=new Date(year,month-1+monthOffset,1);
+ const lastDay=new Date(targetMonth.getFullYear(),targetMonth.getMonth()+1,0).getDate();
+ targetMonth.setDate(Math.min(day,lastDay));
+ return localDateISO(targetMonth);
+}
+const paymentStartDateInput=document.getElementById('paymentStartDate');
+paymentStartDateInput.value=localDateISO();
 const currencySymbols={GTQ:'Q',USD:'US$'};
 const currencyCode=()=>form.elements.currency?.value||'GTQ';
 const currencySymbol=()=>currencySymbols[currencyCode()]||'Q';
@@ -341,6 +365,13 @@ function generatePayments(){
   updateTotal();
   return;
  }
+ const startDate=paymentStartDateInput.value;
+ if(!startDate){
+  message.textContent='Seleccioná la fecha de inicio de pagos antes de generar el plan. No se modificaron los pagos.';
+  paymentStartDateInput.focus();
+  updateTotal();
+  return;
+ }
  // Guarda la cantidad de pagos activos para poder redistribuir el saldo al editar la reserva.
  generatedMonths=months;
  // Distribuye centavos enteros: los primeros pagos reciben el centavo sobrante.
@@ -348,14 +379,17 @@ function generatePayments(){
  const remainder=totalCents%months;
  for(let i=1;i<=12;i++){
   const input=form.elements.namedItem(`pago${i}monto`);
+  const dateInput=form.elements.namedItem(`pago${i}fecha`);
   if(i<=months){
    const cents=base+(i<=remainder?1:0);
    input.value=(cents/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+   dateInput.value=monthlyPaymentDate(startDate,i-1);
   }else{
    input.value='';
+   dateInput.value='';
   }
  }
- message.textContent=`Se generaron ${months} pagos que suman exactamente ${money(totalCents/100)}. Si modificás el Pago 1 · Reserva/arras, los pagos restantes se redistribuyen para conservar el total del enganche. Los demás montos siguen siendo editables.`;
+ message.textContent=`Se generaron ${months} pagos desde ${dateGT(startDate)}, con periodicidad mensual, que suman exactamente ${money(totalCents/100)}. Los montos y fechas siguen siendo editables.`;
  updateTotal();
 }
 document.getElementById('generatePayments').addEventListener('click',generatePayments);
@@ -397,7 +431,7 @@ form.addEventListener('focusout',event=>{
  }
  updateSaldo();updateTotal();
 });
-form.addEventListener('reset',()=>setTimeout(()=>{generatedMonths=0;updateCurrencyLabels();updateSaldo();updateTotal()},0));
+form.addEventListener('reset',()=>setTimeout(()=>{generatedMonths=0;paymentStartDateInput.value=localDateISO();updateCurrencyLabels();updateSaldo();updateTotal()},0));
 updateCurrencyLabels();
 updateSaldo();
 updateTotal();
@@ -445,7 +479,7 @@ function generatePrintFallback(){
   return `<tr><td>${n===1?'Pago 1 · Reserva/arras':`Pago ${n}`}</td><td>${amount?escapeHTML(money(parseMoney(amount))):' '}</td><td>${escapeHTML(date)}</td></tr>`;
  }).join('');
  const total=money(sumPayments());
- const fieldRow=(label,name)=>{const val=values[name]||'';const shown=moneyInputNames.includes(name)&&val?formatMoneyInput(val):val;return `<div class="field"><b>${escapeHTML(label)}</b><span>${escapeHTML(shown)}</span></div>`};
+ const fieldRow=(label,name)=>{const val=values[name]||'';const shown=moneyInputNames.includes(name)&&val?formatMoneyInput(val):val;const display=name==='area'?[val,values.areaUnidad||''].filter(Boolean).join(' '):shown;return `<div class="field"><b>${escapeHTML(label)}</b><span>${escapeHTML(display)}</span></div>`};
  const w=window.open('','_blank');
  if(!w){document.getElementById('status').textContent='El navegador bloqueó la ventana de impresión. Permití las ventanas emergentes e intentá de nuevo.';return;}
  w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>HSM_Formulario_Asignacion</title><style>
@@ -493,7 +527,7 @@ async function generatePDF(){
   sec('01 · DATOS DE LA PROPIEDAD');
   row([['Finca',get('finca')],  ['Folio',get('folio')],['Libro',get('libro')],['Propiedad No.',get('propiedad')]]);
   y -=10;
-  row([['Área del terreno',get('area')]]);
+  row([['Área del terreno',[get('area'),get('areaUnidad')].filter(Boolean).join(' ')]]);
    y -=10;
   sec('02 · DATOS PERSONALES');
   row([['Nombre completo',get('nombre')]]);
